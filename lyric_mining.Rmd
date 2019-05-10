@@ -7,7 +7,13 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+#library(magrittr)
 library(genius)
+library(kernlab) 
+library(caret) 
+library(tm) 
+library(splitstackshape)
+library(e1071)
 ```
 ```{r Loading data}
 dir_input <- paste0(getwd(),  "/Input/")
@@ -32,8 +38,106 @@ if(exists("df_lyrics")){
 write_rds(df_lyrics, file_lyrics)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+```{r}
+df_lyric_dox <- df_lyrics %>% 
+  group_by(artist, album, year_appearance, track_title, track_n) %>% 
+  summarise(lyric = paste0(lyric, collapse = " \n")) %>% 
+  ungroup() %>% 
+  mutate(doc_id = row_number()) %>% 
+  dplyr::select(doc_id, text = lyric, everything())
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+levels_artists <- unique(df_lyric_dox$artist)
+
+df_lyric_dox$artist <- factor(df_lyric_dox$artist, levels = levels_artists)
+
+# Convert df_source to a corpus: df_corpus
+df_source <- DataframeSource(df_lyric_dox)
+corpus_lyrics <- VCorpus(df_source)
+
+corpus_lyrics %<>% 
+  tm_map(content_transformer(stripWhitespace)) %>% 
+  tm_map(content_transformer(tolower)) %>% 
+  tm_map(content_transformer(removeNumbers)) %>% 
+  tm_map(content_transformer(removePunctuation)) %>% 
+  tm_map(removeWords, stopwords("english")) %>% 
+  tm_map(removeWords, c("-", "..."))
+```
+
+```{r Setting up training and test set}
+set.seed(42)
+qty_train <- round(length(corpus_lyrics) * .8, 0)
+idx_train <- sample(1:length(corpus_lyrics), qty_train)
+idx_test <- c(1:length(corpus_lyrics))[!c(1:length(corpus_lyrics)) %in% idx_train]
+
+corpus_train <- corpus_lyrics[idx_train]
+corpus_test <- corpus_lyrics[idx_test]
+```
+
+```{r Creating document term matrices}
+dtm_train <- as.matrix(DocumentTermMatrix(corpus_train, control=list(wordLengths=c(1,Inf))))
+dtm_test <- as.matrix(DocumentTermMatrix(corpus_test, control=list(wordLengths=c(1,Inf))))
+```
+
+```{r Conforming DTMs}
+df_train <- data.frame(dtm_train[,intersect(colnames(dtm_train), colnames(dtm_test))])
+df_test <- data.frame(dtm_test[,intersect(colnames(dtm_test), colnames(dtm_train))])
+```
+
+```{r}
+df_train$corpus <- df_lyric_dox$artist[idx_train]
+df_test$corpus <- df_lyric_dox$artist[idx_test]
+```
+
+```{r Create model}
+fit_model <- ksvm(corpus ~ ., data = df_train, kernel = "rbfdot")
+```
+
+```{r Predict}
+df_pred <- predict(fit_model, df_test)
+```
+
+```{r}
+matrix_confusion <- confusionMatrix(df_pred, df_test$corpus)
+```
+
+# Caret
+
+```{r}
+# libraries needed by caret
+library(klaR)
+library(MASS)
+# for the Naive Bayes modelling
+library(caret)
+# to process the text into a corpus
+library(tm)
+# to get nice looking tables
+library(pander)
+# to simplify selections
+library(dplyr)
+```
+
+```{r}
+# modified sligtly fron the code in the book
+# convert_counts <- function(x) {
+#     x <- ifelse(x > 0, 1, 0)
+#     x <- factor(x, levels = c(0, 1), labels = c("Absent", "Present"))
+# }
+# 
+# df_train %<>% apply(MARGIN=2, FUN=convert_counts)
+# df_test %<>% apply(MARGIN=2, FUN=convert_counts)
+```
+
+
+```{r}
+ctrl <- trainControl(method = "cv", 10)
+sms_model1 <- train(df_train, df_train$corpus, method = "nb", trControl = ctrl)
+```
+
+```{r}
+sms_model2 <- train(sms_train, sms_raw_train$type, method="nb", 
+                    tuneGrid=data.frame(.fL=1, .usekernel=FALSE),
+                trControl=ctrl)
+sms_model2
+```
+
