@@ -1,4 +1,4 @@
-# Mining lyric likeness
+# Mining lyrical likeness
 
 __Goal__: Visualizing likeness of artists in terms of lyrics
 
