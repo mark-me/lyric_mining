@@ -271,23 +271,55 @@ df_lyrics_new &lt;- df_albums %&gt;%
   add_genius(artist, album)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiTm90IEZvdW5kIChIVFRQIDQwNCkuTm90IEZvdW5kIChIVFRQIDQwNCkuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Ob3QgRm91bmQgKEhUVFAgNDA0KS5Kb2luaW5nLCBieSA9IGMoXCJhcnRpc3RcIiwgXCJhbGJ1bVwiLCBcInllYXJfYXBwZWFyYW5jZVwiKVxuIn0= -->
+<!-- rnb-output-begin eyJkYXRhIjoiTm90IEZvdW5kIChIVFRQIDQwNCkuTm90IEZvdW5kIChIVFRQIDQwNCkuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcImFydGlzdFwiLCBcImFsYnVtXCIsIFwieWVhcl9hcHBlYXJhbmNlXCIpXG4ifQ== -->
 <pre><code>Not Found (HTTP 404).Not Found (HTTP 404).Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Not Found (HTTP 404).Joining, by = c(&quot;artist&quot;, &quot;album&quot;, &quot;year_appearance&quot;)</code></pre>
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+Joining, by = c(&quot;artist&quot;, &quot;album&quot;, &quot;year_appearance&quot;)</code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfYWxidW1zICU+JSBcbiAgYW50aV9qb2luKGRmX2x5cmljcywgYnkgPSBjKFwiYXJ0aXN0XCIsIFwiYWxidW1cIikpXG5gYGAifQ== -->
+<pre class="r"><code>df_albums %&gt;% 
+  anti_join(df_lyrics, by = c(&quot;artist&quot;, &quot;album&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInNwZWNfdGJsX2RmIiwidGJsX2RmIiwidGJsIiwiZGF0YS5mcmFtZSJdLCJuY29sIjozLCJucm93IjoxM30sInJkZiI6IlVrUllNd3BZQ2dBQUFBTUFBd1lBQUFNRkFBQUFBQVZWVkVZdE9BQUFCQUlBQUFBQkFBUUFDUUFBQUFGNEFBQURFd0FBQUFNQUFBQVFBQUFBRFFBRUFBa0FBQUFaVG1samF5QkRZWFpsSUNZZ1ZHaGxJRUpoWkNCVFpXVmtjd0FFQUFrQUFBQVpUbWxqYXlCRFlYWmxJQ1lnVkdobElFSmhaQ0JUWldWa2N3QUVBQWtBQUFBTVZHbHVaR1Z5YzNScFkydHpBQVFBQ1FBQUFBeFVhVzVrWlhKemRHbGphM01BQkFBSkFBQUFERlJwYm1SbGNuTjBhV05yY3dBRUFBa0FBQUFNVkdsdVpHVnljM1JwWTJ0ekFBUUFDUUFBQUF4VWFXNWtaWEp6ZEdsamEzTUFCQUFKQUFBQURGUnBibVJsY25OMGFXTnJjd0FFQUFrQUFBQU1WR2x1WkdWeWMzUnBZMnR6QUFRQUNRQUFBQXhVYVc1a1pYSnpkR2xqYTNNQUJBQUpBQUFBREZScGJtUmxjbk4wYVdOcmN3QUVBQWtBQUFBTVZHbHVaR1Z5YzNScFkydHpBQVFBQ1FBQUFBeFVhVzVrWlhKemRHbGphM01BQUFBUUFBQUFEUUFFQUFrQUFBQU5TR1Z1Y25rbmN5QkVjbVZoYlFBRUFBa0FBQUFTVkdobElFSnZZWFJ0WVc0bmN5QkRZV3hzQUFRQUNRQUFBQnhVYUdVZ1JtbHljM1FnVkdsdVpHVnljM1JwWTJ0eklFRnNZblZ0QUFRQUNRQUFBQXhVYVc1a1pYSnpkR2xqYTNNQUJBQUpBQUFBRDFOcGJYQnNaU0JRYkdWaGMzVnlaUUFFQUFrQUFBQUlRM1Z5ZEdGcGJuTUFCQUFKQUFBQUNFdGhkR2hzWldWdUFBUUFDUUFBQUE5RFlXNGdUM1Z5SUV4dmRtVXVMaTRBQkFBSkFBQUFGRmRoYVhScGJtY2dabTl5SUhSb1pTQk5iMjl1QUFRQUNRQUFBQTVVYUdVZ1NIVnVaM0o1SUZOaGR3QUVBQWtBQUFBWFJtRnNiR2x1WnlCRWIzZHVJR0VnVFc5MWJuUmhhVzRBQkFBSkFBQUFFbFJvWlNCVGIyMWxkR2hwYm1jZ1VtRnBiZ0FFQUFrQUFBQVFWR2hsSUZkaGFYUnBibWNnVW05dmJRQUFBQTRBQUFBTlFKOGdBQUFBQUFCQW56UUFBQUFBQUVDZkpBQUFBQUFBUUo4c0FBQUFBQUJBbnp3QUFBQUFBRUNmTkFBQUFBQUFRSjhvQUFBQUFBQkFuMFFBQUFBQUFFQ2ZUQUFBQUFBQVFKOWdBQUFBQUFCQW4yZ0FBQUFBQUVDZmNBQUFBQUFBUUorQUFBQUFBQUFBQUFRQ0FBQUFBUUFFQUFrQUFBQUZZMnhoYzNNQUFBQVFBQUFBQVFBRUFBa0FBQUFLWkdGMFlTNW1jbUZ0WlFBQUJBSUFBQUFCQUFRQUNRQUFBQWx5YjNjdWJtRnRaWE1BQUFBTkFBQUFBb0FBQUFELy8vL3pBQUFFQWdBQUFBRUFCQUFKQUFBQUJXNWhiV1Z6QUFBQUVBQUFBQU1BQkFBSkFBQUFCbUZ5ZEdsemRBQUVBQWtBQUFBRllXeGlkVzBBQkFBSkFBQUFEM2xsWVhKZllYQndaV0Z5WVc1alpRQUFBUDRBQUFRQ0FBQUFBUUFFQUFrQUFBQUhiM0IwYVc5dWN3QUFBaE1BQUFBRkFBQUFFQUFBQUFFQUJBQUpBQUFBQVhJQUFBQVFBQUFBQVFBRUFBa0FBQUFNVEc5aFpHbHVaeUJrWVhSaEFBQUFDZ0FBQUFFQUFBQUFBQUFBRFFBQUFBRUFBQUFOQUFBQURRQUFBQUVBQUFBREFBQUVBZ0FBQlA4QUFBQVFBQUFBQlFBRUFBa0FBQUFHWlc1bmFXNWxBQVFBQ1FBQUFBVnNZV0psYkFBRUFBa0FBQUFPY205M2JtRnRaWE11Y0hKcGJuUUFCQUFKQUFBQUNuSnZkM011ZEc5MFlXd0FCQUFKQUFBQUNtTnZiSE11ZEc5MFlXd0FBQUQrQUFBQS9nPT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["artist"],"name":[1],"type":["chr"],"align":["left"]},{"label":["album"],"name":[2],"type":["chr"],"align":["left"]},{"label":["year_appearance"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"Nick Cave & The Bad Seeds","2":"Henry's Dream","3":"1992"},{"1":"Nick Cave & The Bad Seeds","2":"The Boatman's Call","3":"1997"},{"1":"Tindersticks","2":"The First Tindersticks Album","3":"1993"},{"1":"Tindersticks","2":"Tindersticks","3":"1995"},{"1":"Tindersticks","2":"Simple Pleasure","3":"1999"},{"1":"Tindersticks","2":"Curtains","3":"1997"},{"1":"Tindersticks","2":"Kathleen","3":"1994"},{"1":"Tindersticks","2":"Can Our Love...","3":"2001"},{"1":"Tindersticks","2":"Waiting for the Moon","3":"2003"},{"1":"Tindersticks","2":"The Hungry Saw","3":"2008"},{"1":"Tindersticks","2":"Falling Down a Mountain","3":"2010"},{"1":"Tindersticks","2":"The Something Rain","3":"2012"},{"1":"Tindersticks","2":"The Waiting Room","3":"2016"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[13]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDb252ZXJ0IGRmX3NvdXJjZSB0byBhIGNvcnB1czogZGZfY29ycHVzXG5kZl9zb3VyY2UgPC0gRGF0YWZyYW1lU291cmNlKGRmX2x5cmljX2RveClcblxuYGBgIn0= -->
-<pre class="r"><code># Convert df_source to a corpus: df_corpus
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfbHlyaWNfZG94IDwtIGRmX2x5cmljcyAlPiUgXG4gIGdyb3VwX2J5KGFydGlzdCwgYWxidW0sIHllYXJfYXBwZWFyYW5jZSwgdHJhY2tfdGl0bGUsIHRyYWNrX24pICU+JSBcbiAgc3VtbWFyaXNlKGx5cmljID0gcGFzdGUwKGx5cmljLCBjb2xsYXBzZSA9IFwiIFxcblwiKSkgJT4lIFxuICB1bmdyb3VwKCkgJT4lIFxuICBtdXRhdGUoZG9jX2lkID0gcm93X251bWJlcigpKSAlPiUgXG4gIGRwbHlyOjpzZWxlY3QoZG9jX2lkLCB0ZXh0ID0gbHlyaWMsIGV2ZXJ5dGhpbmcoKSlcbmxldmVsc19hcnRpc3RzIDwtIHVuaXF1ZShkZl9seXJpY19kb3gkYXJ0aXN0KVxuZGZfbHlyaWNfZG94JGFydGlzdCA8LSBmYWN0b3IoZGZfbHlyaWNfZG94JGFydGlzdCwgbGV2ZWxzID0gbGV2ZWxzX2FydGlzdHMpXG4jIENvbnZlcnQgZGZfc291cmNlIHRvIGEgY29ycHVzOiBkZl9jb3JwdXNcbmRmX3NvdXJjZSA8LSBEYXRhZnJhbWVTb3VyY2UoZGZfbHlyaWNfZG94KVxuY29ycHVzX2x5cmljcyA8LSBWQ29ycHVzKGRmX3NvdXJjZSlcbmNvcnB1c19seXJpY3MgJTw+JSBcbiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIoc3RyaXBXaGl0ZXNwYWNlKSkgJT4lIFxuICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcih0b2xvd2VyKSkgJT4lIFxuICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcihyZW1vdmVOdW1iZXJzKSkgJT4lIFxuICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcihyZW1vdmVQdW5jdHVhdGlvbikpICU+JSBcbiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBzdG9wd29yZHMoXCJlbmdsaXNoXCIpKSAlPiUgXG4gIHRtX21hcChyZW1vdmVXb3JkcywgYyhcIi1cIiwgXCIuLi5cIikpXG5gYGAifQ== -->
+<pre class="r"><code>df_lyric_dox &lt;- df_lyrics %&gt;% 
+  group_by(artist, album, year_appearance, track_title, track_n) %&gt;% 
+  summarise(lyric = paste0(lyric, collapse = &quot; \n&quot;)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(doc_id = row_number()) %&gt;% 
+  dplyr::select(doc_id, text = lyric, everything())
+levels_artists &lt;- unique(df_lyric_dox$artist)
+df_lyric_dox$artist &lt;- factor(df_lyric_dox$artist, levels = levels_artists)
+# Convert df_source to a corpus: df_corpus
 df_source &lt;- DataframeSource(df_lyric_dox)
-</code></pre>
+corpus_lyrics &lt;- VCorpus(df_source)
+corpus_lyrics %&lt;&gt;% 
+  tm_map(content_transformer(stripWhitespace)) %&gt;% 
+  tm_map(content_transformer(tolower)) %&gt;% 
+  tm_map(content_transformer(removeNumbers)) %&gt;% 
+  tm_map(content_transformer(removePunctuation)) %&gt;% 
+  tm_map(removeWords, stopwords(&quot;english&quot;)) %&gt;% 
+  tm_map(removeWords, c(&quot;-&quot;, &quot;...&quot;))</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gRGF0YWZyYW1lU291cmNlKGRmX2x5cmljX2RveCkgOiBcbiAgY291bGQgbm90IGZpbmQgZnVuY3Rpb24gXCJEYXRhZnJhbWVTb3VyY2VcIlxuIn0= -->
-<pre><code>Error in DataframeSource(df_lyric_dox) : 
-  could not find function &quot;DataframeSource&quot;</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -320,40 +352,9 @@ df_test &lt;- data.frame(dtm_test[,intersect(colnames(dtm_test), colnames(dtm_tr
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfbHlyaWNfZG94JGFydGlzdFtpZHhfdGVzdF1cblxuYGBgIn0= -->
-<pre class="r"><code>df_lyric_dox$artist[idx_test]
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiIFsxXSBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHNcbiBbNl0gTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzXG5bMTFdIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkc1xuWzE2XSBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHNcblsyMV0gTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzXG5bMjZdIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkc1xuWzMxXSBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIFRvbSBXYWl0cyAgICAgICAgICAgICAgICBcblszNl0gVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgXG5bNDFdIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgIFxuWzQ2XSBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICBcbls1MV0gVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgXG5bNTZdIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgIFxuWzYxXSBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICBcbls2Nl0gVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgXG5bNzFdIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICBUb20gV2FpdHMgICAgICAgICAgICAgICAgIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgVG9tIFdhaXRzICAgICAgICAgICAgICAgIFxuWzc2XSBUb20gV2FpdHMgICAgICAgICAgICAgICAgXG5MZXZlbHM6IE5pY2sgQ2F2ZSAmIFRoZSBCYWQgU2VlZHMgVG9tIFdhaXRzXG4ifQ== -->
-<pre><code> [1] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds
- [6] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds
-[11] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds
-[16] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds
-[21] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds
-[26] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds
-[31] Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Nick Cave &amp; The Bad Seeds Tom Waits                
-[36] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[41] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[46] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[51] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[56] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[61] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[66] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[71] Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                 Tom Waits                
-[76] Tom Waits                
-Levels: Nick Cave &amp; The Bad Seeds Tom Waits</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0X21vZGVsIDwtIGtzdm0oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBrZXJuZWwgPSBcInJiZmRvdFwiKVxuYGBgIn0= -->
-<pre class="r"><code>fit_model &lt;- ksvm(corpus ~ ., data = df_train, kernel = &quot;rbfdot&quot;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0X2FydGlzdHMgPC0gdHJhaW4oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBtZXRob2QgPSBcInN2bUxpbmVhcjNcIilcbmBgYCJ9 -->
-<pre class="r"><code>fit_artists &lt;- train(corpus ~ ., data = df_train, method = &quot;svmLinear3&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfdHJhaW4kY29ycHVzIDwtIGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3RyYWluXVxuZGZfdGVzdCRjb3JwdXMgPC0gZGZfbHlyaWNfZG94JGFydGlzdFtpZHhfdGVzdF1cbmBgYCJ9 -->
+<pre class="r"><code>df_train$corpus &lt;- df_lyric_dox$artist[idx_train]
+df_test$corpus &lt;- df_lyric_dox$artist[idx_test]</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -368,61 +369,84 @@ Levels: Nick Cave &amp; The Bad Seeds Tom Waits</code></pre>
   only classification models that produce probabilities are allowed</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0X2FydGlzdHMgPC0gdHJhaW4oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBtZXRob2QgPSBcInN2bUxpbmVhcjNcIilcbmBgYCJ9 -->
+<pre class="r"><code>fit_artists &lt;- train(corpus ~ ., data = df_train, method = &quot;svmLinear3&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWF0cml4X2NvbmZ1c2lvblxuXG5gYGAifQ== -->
-<pre class="r"><code>matrix_confusion
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfcHJlZCA8LSBwcmVkaWN0KGZpdF9hcnRpc3RzLCBkZl90ZXN0LCB0eXBlID0gXCJwcm9iXCIpXG5gYGAifQ== -->
+<pre class="r"><code>df_pred &lt;- predict(fit_artists, df_test, type = &quot;prob&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiQ29uZnVzaW9uIE1hdHJpeCBhbmQgU3RhdGlzdGljc1xuXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBSZWZlcmVuY2VcblByZWRpY3Rpb24gICAgICAgICAgICAgICAgICBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIFRvbSBXYWl0c1xuICBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzICAgICAgICAgICAgICAgICAgICAgICAgMjMgICAgICAgICA5XG4gIFRvbSBXYWl0cyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxMSAgICAgICAgMzNcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgQWNjdXJhY3kgOiAwLjczNjggICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgIDk1JSBDSSA6ICgwLjYyMzIsIDAuODMxMykgICAgICAgICBcbiAgICBObyBJbmZvcm1hdGlvbiBSYXRlIDogMC41NTI2ICAgICAgICAgICAgICAgICAgIFxuICAgIFAtVmFsdWUgW0FjYyA+IE5JUl0gOiAwLjAwMDcyNDEgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgIEthcHBhIDogMC40NjQ4ICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gTWNuZW1hcidzIFRlc3QgUC1WYWx1ZSA6IDAuODIzMDYzMyAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgU2Vuc2l0aXZpdHkgOiAwLjY3NjUgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICBTcGVjaWZpY2l0eSA6IDAuNzg1NyAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgIFBvcyBQcmVkIFZhbHVlIDogMC43MTg4ICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgTmVnIFByZWQgVmFsdWUgOiAwLjc1MDAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgUHJldmFsZW5jZSA6IDAuNDQ3NCAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgIERldGVjdGlvbiBSYXRlIDogMC4zMDI2ICAgICAgICAgICAgICAgICAgIFxuICAgRGV0ZWN0aW9uIFByZXZhbGVuY2UgOiAwLjQyMTEgICAgICAgICAgICAgICAgICAgXG4gICAgICBCYWxhbmNlZCBBY2N1cmFjeSA6IDAuNzMxMSAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICdQb3NpdGl2ZScgQ2xhc3MgOiBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiJ9 -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gcHJlZGljdC50cmFpbihmaXRfYXJ0aXN0cywgZGZfdGVzdCwgdHlwZSA9IFwicHJvYlwiKSA6IFxuICBvbmx5IGNsYXNzaWZpY2F0aW9uIG1vZGVscyB0aGF0IHByb2R1Y2UgcHJvYmFiaWxpdGllcyBhcmUgYWxsb3dlZFxuIn0= -->
+<pre><code>Error in predict.train(fit_artists, df_test, type = &quot;prob&quot;) : 
+  only classification models that produce probabilities are allowed</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWF0cml4X2NvbmZ1c2lvbiA8LSBjb25mdXNpb25NYXRyaXgoZGZfcHJlZCwgZGZfdGVzdCRjb3JwdXMpXG5tYXRyaXhfY29uZnVzaW9uXG5gYGAifQ== -->
+<pre class="r"><code>matrix_confusion &lt;- confusionMatrix(df_pred, df_test$corpus)
+matrix_confusion</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29uZnVzaW9uIE1hdHJpeCBhbmQgU3RhdGlzdGljc1xuXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBSZWZlcmVuY2VcblByZWRpY3Rpb24gICAgICAgICAgICAgICAgICBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIFRpbmRlcnN0aWNrcyBUb20gV2FpdHNcbiAgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyAgICAgICAgICAgICAgICAgICAgICAgIDE2ICAgICAgICAgICAgMyAgICAgICAgIDVcbiAgVGluZGVyc3RpY2tzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA2ICAgICAgICAgICAxNCAgICAgICAgIDNcbiAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA4ICAgICAgICAgICAxMCAgICAgICAgMzNcblxuT3ZlcmFsbCBTdGF0aXN0aWNzXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgIEFjY3VyYWN5IDogMC42NDI5ICAgICAgICAgIFxuICAgICAgICAgICAgICAgICA5NSUgQ0kgOiAoMC41Mzk3LCAwLjczNzEpXG4gICAgTm8gSW5mb3JtYXRpb24gUmF0ZSA6IDAuNDE4NCAgICAgICAgICBcbiAgICBQLVZhbHVlIFtBY2MgPiBOSVJdIDogNi4yMThlLTA2ICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICBLYXBwYSA6IDAuNDQ0MyAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIE1jbmVtYXIncyBUZXN0IFAtVmFsdWUgOiAwLjE0MSAgICAgICAgICAgXG5cblN0YXRpc3RpY3MgYnkgQ2xhc3M6XG5cbiAgICAgICAgICAgICAgICAgICAgIENsYXNzOiBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIENsYXNzOiBUaW5kZXJzdGlja3MgQ2xhc3M6IFRvbSBXYWl0c1xuU2Vuc2l0aXZpdHkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjUzMzMgICAgICAgICAgICAgIDAuNTE4NSAgICAgICAgICAgMC44MDQ5XG5TcGVjaWZpY2l0eSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuODgyNCAgICAgICAgICAgICAgMC44NzMyICAgICAgICAgICAwLjY4NDJcblBvcyBQcmVkIFZhbHVlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC42NjY3ICAgICAgICAgICAgICAwLjYwODcgICAgICAgICAgIDAuNjQ3MVxuTmVnIFByZWQgVmFsdWUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjgxMDggICAgICAgICAgICAgIDAuODI2NyAgICAgICAgICAgMC44Mjk4XG5QcmV2YWxlbmNlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMzA2MSAgICAgICAgICAgICAgMC4yNzU1ICAgICAgICAgICAwLjQxODRcbkRldGVjdGlvbiBSYXRlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4xNjMzICAgICAgICAgICAgICAwLjE0MjkgICAgICAgICAgIDAuMzM2N1xuRGV0ZWN0aW9uIFByZXZhbGVuY2UgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjI0NDkgICAgICAgICAgICAgIDAuMjM0NyAgICAgICAgICAgMC41MjA0XG5CYWxhbmNlZCBBY2N1cmFjeSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuNzA3OCAgICAgICAgICAgICAgMC42OTU5ICAgICAgICAgICAwLjc0NDVcbiJ9 -->
 <pre><code>Confusion Matrix and Statistics
 
                            Reference
-Prediction                  Nick Cave &amp; The Bad Seeds Tom Waits
-  Nick Cave &amp; The Bad Seeds                        23         9
-  Tom Waits                                        11        33
-                                                   
-               Accuracy : 0.7368                   
-                 95% CI : (0.6232, 0.8313)         
-    No Information Rate : 0.5526                   
-    P-Value [Acc &gt; NIR] : 0.0007241                
-                                                   
-                  Kappa : 0.4648                   
-                                                   
- Mcnemar's Test P-Value : 0.8230633                
-                                                   
-            Sensitivity : 0.6765                   
-            Specificity : 0.7857                   
-         Pos Pred Value : 0.7188                   
-         Neg Pred Value : 0.7500                   
-             Prevalence : 0.4474                   
-         Detection Rate : 0.3026                   
-   Detection Prevalence : 0.4211                   
-      Balanced Accuracy : 0.7311                   
-                                                   
-       'Positive' Class : Nick Cave &amp; The Bad Seeds
-                                                   </code></pre>
+Prediction                  Nick Cave &amp; The Bad Seeds Tindersticks Tom Waits
+  Nick Cave &amp; The Bad Seeds                        16            3         5
+  Tindersticks                                      6           14         3
+  Tom Waits                                         8           10        33
+
+Overall Statistics
+                                          
+               Accuracy : 0.6429          
+                 95% CI : (0.5397, 0.7371)
+    No Information Rate : 0.4184          
+    P-Value [Acc &gt; NIR] : 6.218e-06       
+                                          
+                  Kappa : 0.4443          
+                                          
+ Mcnemar's Test P-Value : 0.141           
+
+Statistics by Class:
+
+                     Class: Nick Cave &amp; The Bad Seeds Class: Tindersticks Class: Tom Waits
+Sensitivity                                    0.5333              0.5185           0.8049
+Specificity                                    0.8824              0.8732           0.6842
+Pos Pred Value                                 0.6667              0.6087           0.6471
+Neg Pred Value                                 0.8108              0.8267           0.8298
+Prevalence                                     0.3061              0.2755           0.4184
+Detection Rate                                 0.1633              0.1429           0.3367
+Detection Prevalence                           0.2449              0.2347           0.5204
+Balanced Accuracy                              0.7078              0.6959           0.7445</code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwZXJmb3JtYW5jZUVzdGltYXRpb24pXG5jbGFzc2lmaWNhdGlvbk1ldHJpY3MoZGZfYWNjdXJhY3kkYXJ0aXN0LCBkZl9hY2N1cmFjeSRwcmVkaWN0aW9uKVxuYGBgIn0= -->
+<pre class="r"><code>library(performanceEstimation)
+classificationMetrics(df_accuracy$artist, df_accuracy$prediction)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2xhc3NpZmljYXRpb25NZXRyaWNzKGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3Rlc3RdLCBkZl9wcmVkKVxuXG5gYGAifQ== -->
-<pre class="r"><code>classificationMetrics(df_lyric_dox$artist[idx_test], df_pred)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2xhc3NpZmljYXRpb25NZXRyaWNzKGRmX2FjY3VyYWN5JGFydGlzdCwgZGZfYWNjdXJhY3kkcHJlZGljdGlvbilcblxuYGBgIn0= -->
+<pre class="r"><code>classificationMetrics(df_accuracy$artist, df_accuracy$prediction)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgIGZwciAgICAgICAgZm5yICAgICAgICB0cHIgICAgICAgIHRuciAgICAgICAgcmVjICAgICAgIHNlbnMgICAgICAgc3BlYyAgICAgICBwcmVjICAgICAgICBycHAgICAgICAgbGlmdCAgICAgICAgICBGICAgICAgICBwcHYgICAgICAgIGZkciBcbjAuMjE0Mjg1NzEgMC4zMjM1Mjk0MSAwLjY3NjQ3MDU5IDAuNzg1NzE0MjkgMC42NzY0NzA1OSAwLjY3NjQ3MDU5IDAuNzg1NzE0MjkgMC43MTg3NTAwMCAwLjQyMTA1MjYzIDAuMDIxMTM5NzEgMC42OTY5Njk3MCAwLjcxODc1MDAwIDAuMjgxMjUwMDAgXG4gICAgICAgbnB2ICAgICAgICBmb3IgICAgICAgIHBsciAgICAgICAgbmxyICAgICAgICBkb3IgICAgICAgIGFjYyAgICAgICAgZXJyICAgICBtaWNyb0YgICAgIG1hY3JvRiAgIG1hY3JvUmVjICBtYWNyb1ByZWMgXG4wLjc1MDAwMDAwIDAuMjUwMDAwMDAgMy4xNTY4NjI3NSAwLjQxMTc2NDcxIDcuNjY2NjY2NjcgMC43MzY4NDIxMSAwLjI2MzE1Nzg5IDAuNzM2ODQyMTEgMC43MzIyMDU3OCAwLjczMTA5MjQ0IDAuNzM0Mzc1MDAgXG4ifQ== -->
-<pre><code>       fpr        fnr        tpr        tnr        rec       sens       spec       prec        rpp       lift          F        ppv        fdr 
-0.21428571 0.32352941 0.67647059 0.78571429 0.67647059 0.67647059 0.78571429 0.71875000 0.42105263 0.02113971 0.69696970 0.71875000 0.28125000 
-       npv        for        plr        nlr        dor        acc        err     microF     macroF   macroRec  macroPrec 
-0.75000000 0.25000000 3.15686275 0.41176471 7.66666667 0.73684211 0.26315789 0.73684211 0.73220578 0.73109244 0.73437500 </code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgYWNjICAgICAgIGVyciAgICBtaWNyb0YgICAgbWFjcm9GICBtYWNyb1JlYyBtYWNyb1ByZWMgXG4wLjY0Mjg1NzEgMC4zNTcxNDI5IDAuNjQyODU3MSAwLjYyMzMyODAgMC42MTg5MTAwIDAuNjQwODA3MCBcbiJ9 -->
+<pre><code>      acc       err    microF    macroF  macroRec macroPrec 
+0.6428571 0.3571429 0.6428571 0.6233280 0.6189100 0.6408070 </code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTWluaW5nIEx5cmljcyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCgpgYGB7cn0KbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkobWFncml0dHIpCmxpYnJhcnkoZ2VuaXVzKQpsaWJyYXJ5KGtlcm5sYWIpIApsaWJyYXJ5KGNhcmV0KSAKbGlicmFyeSh0bSkgCmxpYnJhcnkoc3BsaXRzdGFja3NoYXBlKQpsaWJyYXJ5KGUxMDcxKQpgYGAKYGBge3IgTG9hZGluZyBkYXRhfQpkaXJfaW5wdXQgPC0gcGFzdGUwKGdldHdkKCksICAiL0lucHV0LyIpCmZpbGVfbHlyaWNzIDwtIHBhc3RlMChkaXJfaW5wdXQsICJkZl9seXJpY3MuUkRTIikKCiMgUmVhZCBhbGJ1bXMgYW5kIHByZS1wcm9jZXNzZWQgbHlyaWNzCiMgZGZfYWxidW1zIDwtIHJlYWRfY3N2MigiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21hcmstbWUvbHlyaWNfbWluaW5nL21hc3Rlci9hcnRpc3RzX2FsYnVtcy5jc3YiKQpkZl9hbGJ1bXMgPC0gcmVhZF9jc3YyKCJhcnRpc3RzX2FsYnVtcy5jc3YiKQppZihmaWxlLmV4aXN0cyhmaWxlX2x5cmljcykpewogIGRmX2x5cmljcyA8LSByZWFkX3JkcyhmaWxlX2x5cmljcykgCn0gZWxzZSB7CiAgZGZfbHlyaWNzIDwtIHRpYmJsZShhcnRpc3QgPSBjaGFyYWN0ZXIoMCksCiAgICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGNoYXJhY3RlcigwKSkKfQoKIyBTZWUgd2hldGhlciBuZXcgYWxidW1uIGx5cmljcyBzaG91bGQgYmUgcmV0cmlldmVkCmRmX2x5cmljc19uZXcgPC0gZGZfYWxidW1zICU+JSAKICBhbnRpX2pvaW4oZGZfbHlyaWNzLCBieSA9IGMoImFydGlzdCIsICJhbGJ1bSIpKSAlPiUgCiAgYWRkX2dlbml1cyhhcnRpc3QsIGFsYnVtKQoKIyBBZGQgbmV3IGFsYnVtIGx5cmljcwppZihucm93KGRmX2x5cmljc19uZXcpID4gMCl7CiAgZGZfbHlyaWNzIDwtIHJiaW5kKGRmX2x5cmljcywgZGZfbHlyaWNzX25ldykKfSBlbHNlIGlmKG5yb3coZGZfbHlyaWNzKSA9PSAwKXsKICBkZl9seXJpY3MgPC0gZGZfbHlyaWNzX25ldwp9Cgp3cml0ZV9yZHMoZGZfbHlyaWNzLCBmaWxlX2x5cmljcywgY29tcHJlc3MgPSAiZ3oiKQpgYGAKCgpgYGB7cn0KZGZfbHlyaWNfZG94IDwtIGRmX2x5cmljcyAlPiUgCiAgZ3JvdXBfYnkoYXJ0aXN0LCBhbGJ1bSwgeWVhcl9hcHBlYXJhbmNlLCB0cmFja190aXRsZSwgdHJhY2tfbikgJT4lIAogIHN1bW1hcmlzZShseXJpYyA9IHBhc3RlMChseXJpYywgY29sbGFwc2UgPSAiIFxuIikpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShkb2NfaWQgPSByb3dfbnVtYmVyKCkpICU+JSAKICBkcGx5cjo6c2VsZWN0KGRvY19pZCwgdGV4dCA9IGx5cmljLCBldmVyeXRoaW5nKCkpCgpsZXZlbHNfYXJ0aXN0cyA8LSB1bmlxdWUoZGZfbHlyaWNfZG94JGFydGlzdCkKCmRmX2x5cmljX2RveCRhcnRpc3QgPC0gZmFjdG9yKGRmX2x5cmljX2RveCRhcnRpc3QsIGxldmVscyA9IGxldmVsc19hcnRpc3RzKQoKIyBDb252ZXJ0IGRmX3NvdXJjZSB0byBhIGNvcnB1czogZGZfY29ycHVzCmRmX3NvdXJjZSA8LSBEYXRhZnJhbWVTb3VyY2UoZGZfbHlyaWNfZG94KQpjb3JwdXNfbHlyaWNzIDwtIFZDb3JwdXMoZGZfc291cmNlKQoKY29ycHVzX2x5cmljcyAlPD4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHN0cmlwV2hpdGVzcGFjZSkpICU+JSAKICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcih0b2xvd2VyKSkgJT4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHJlbW92ZU51bWJlcnMpKSAlPiUgCiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIocmVtb3ZlUHVuY3R1YXRpb24pKSAlPiUgCiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBzdG9wd29yZHMoImVuZ2xpc2giKSkgJT4lIAogIHRtX21hcChyZW1vdmVXb3JkcywgYygiLSIsICIuLi4iKSkKYGBgCgpgYGB7ciBTZXR0aW5nIHVwIHRyYWluaW5nIGFuZCB0ZXN0IHNldH0Kc2V0LnNlZWQoNDIpCnF0eV90cmFpbiA8LSByb3VuZChsZW5ndGgoY29ycHVzX2x5cmljcykgKiAuOCwgMCkKaWR4X3RyYWluIDwtIHNhbXBsZSgxOmxlbmd0aChjb3JwdXNfbHlyaWNzKSwgcXR5X3RyYWluKQppZHhfdGVzdCA8LSBjKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpKVshYygxOmxlbmd0aChjb3JwdXNfbHlyaWNzKSkgJWluJSBpZHhfdHJhaW5dCgpjb3JwdXNfdHJhaW4gPC0gY29ycHVzX2x5cmljc1tpZHhfdHJhaW5dCmNvcnB1c190ZXN0IDwtIGNvcnB1c19seXJpY3NbaWR4X3Rlc3RdCmBgYAoKYGBge3IgQ3JlYXRpbmcgZG9jdW1lbnQgdGVybSBtYXRyaWNlc30KZHRtX3RyYWluIDwtIGFzLm1hdHJpeChEb2N1bWVudFRlcm1NYXRyaXgoY29ycHVzX3RyYWluLCBjb250cm9sPWxpc3Qod29yZExlbmd0aHM9YygxLEluZikpKSkKZHRtX3Rlc3QgPC0gYXMubWF0cml4KERvY3VtZW50VGVybU1hdHJpeChjb3JwdXNfdGVzdCwgY29udHJvbD1saXN0KHdvcmRMZW5ndGhzPWMoMSxJbmYpKSkpCmBgYAoKYGBge3IgQ29uZm9ybWluZyBEVE1zfQpkZl90cmFpbiA8LSBkYXRhLmZyYW1lKGR0bV90cmFpblssaW50ZXJzZWN0KGNvbG5hbWVzKGR0bV90cmFpbiksIGNvbG5hbWVzKGR0bV90ZXN0KSldKQpkZl90ZXN0IDwtIGRhdGEuZnJhbWUoZHRtX3Rlc3RbLGludGVyc2VjdChjb2xuYW1lcyhkdG1fdGVzdCksIGNvbG5hbWVzKGR0bV90cmFpbikpXSkKYGBgCgpgYGB7cn0KZGZfdHJhaW4kY29ycHVzIDwtIGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3RyYWluXQpkZl90ZXN0JGNvcnB1cyA8LSBkZl9seXJpY19kb3gkYXJ0aXN0W2lkeF90ZXN0XQpgYGAKCmBgYHtyIENyZWF0ZSBtb2RlbH0KZml0X21vZGVsIDwtIGtzdm0oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBrZXJuZWwgPSAicmJmZG90IikKYGBgCmBgYHtyfQpmaXRfYXJ0aXN0cyA8LSB0cmFpbihjb3JwdXMgfiAuLCBkYXRhID0gZGZfdHJhaW4sIG1ldGhvZCA9ICJzdm1MaW5lYXIzIikKYGBgCgpgYGB7ciBQcmVkaWN0fQpkZl9wcmVkIDwtIHByZWRpY3QoZml0X2FydGlzdHMsIGRmX3Rlc3QsIHR5cGUgPSAicHJvYiIpCmBgYAoKYGBge3J9Cm1hdHJpeF9jb25mdXNpb24gPC0gY29uZnVzaW9uTWF0cml4KGRmX3ByZWQsIGRmX3Rlc3QkY29ycHVzKQptYXRyaXhfY29uZnVzaW9uCmBgYAoKYGBge3J9CmRmX2FjY3VyYWN5IDwtIHRpYmJsZShwcmVkaWN0aW9uID0gZGZfcHJlZCwgYXJ0aXN0ID0gZGZfbHlyaWNfZG94JGFydGlzdFtpZHhfdGVzdF0pCgpkZl9hY2N1cmFjeSRhY2N1cmFjeSA8LSBpZl9lbHNlKGRmX2FjY3VyYWN5JHByZWRpY3Rpb24gPT0gZGZfYWNjdXJhY3kkYXJ0aXN0LCAxLCAwKQpyb3VuZChwcm9wLnRhYmxlKHRhYmxlKGRmX2FjY3VyYWN5JGFjY3VyYWN5KSksIDMpCgpsaWJyYXJ5KHBlcmZvcm1hbmNlRXN0aW1hdGlvbikKY2xhc3NpZmljYXRpb25NZXRyaWNzKGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3Rlc3RdLCBkZl9wcmVkKQoKbW9zdF9jb21tb25fbWlzY2xhc3NpZmllZF9yYXRpbmdzID0gY2hlY2tfYWNjdXJhY3kgJT4lIGZpbHRlcihjaGVja19hY2N1cmFjeSRhY2N1cmFjeSA9PSAwKSAlPiUKIGdyb3VwX2J5KHJhdGluZykgJT4lCiBzdW1tYXJpc2UoQ291bnQgPSBuKCkpICU+JQogYXJyYW5nZShkZXNjKENvdW50KSkgJT4lCiBoZWFkKDMpCiMjTW9zdCBjb21tb25nIG1pc3NjbGFzc2lmaWVkIHJhdGluZwpsZXZlbHModHJhaW5fZGF0JGhpZ2hlc3RfcmF0aW5nKVttb3N0X2NvbW1vbl9taXNjbGFzc2lmaWVkX3JhdGluZ3MkcmF0aW5nXQpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTWluaW5nIEx5cmljcyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCgpgYGB7cn0KbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkobWFncml0dHIpCmxpYnJhcnkoZ2VuaXVzKQpsaWJyYXJ5KGtlcm5sYWIpIApsaWJyYXJ5KGNhcmV0KSAKbGlicmFyeSh0bSkgCmxpYnJhcnkoc3BsaXRzdGFja3NoYXBlKQpsaWJyYXJ5KGUxMDcxKQpgYGAKYGBge3IgTG9hZGluZyBkYXRhfQpkaXJfaW5wdXQgPC0gcGFzdGUwKGdldHdkKCksICAiL0lucHV0LyIpCmZpbGVfbHlyaWNzIDwtIHBhc3RlMChkaXJfaW5wdXQsICJkZl9seXJpY3MuUkRTIikKCiMgUmVhZCBhbGJ1bXMgYW5kIHByZS1wcm9jZXNzZWQgbHlyaWNzCiMgZGZfYWxidW1zIDwtIHJlYWRfY3N2MigiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21hcmstbWUvbHlyaWNfbWluaW5nL21hc3Rlci9hcnRpc3RzX2FsYnVtcy5jc3YiKQpkZl9hbGJ1bXMgPC0gcmVhZF9jc3YyKCJhcnRpc3RzX2FsYnVtcy5jc3YiKQppZihmaWxlLmV4aXN0cyhmaWxlX2x5cmljcykpewogIGRmX2x5cmljcyA8LSByZWFkX3JkcyhmaWxlX2x5cmljcykgCn0gZWxzZSB7CiAgZGZfbHlyaWNzIDwtIHRpYmJsZShhcnRpc3QgPSBjaGFyYWN0ZXIoMCksCiAgICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGNoYXJhY3RlcigwKSkKfQoKIyBTZWUgd2hldGhlciBuZXcgYWxidW1uIGx5cmljcyBzaG91bGQgYmUgcmV0cmlldmVkCmRmX2x5cmljc19uZXcgPC0gZGZfYWxidW1zICU+JSAKICBhbnRpX2pvaW4oZGZfbHlyaWNzLCBieSA9IGMoImFydGlzdCIsICJhbGJ1bSIpKSAlPiUgCiAgYWRkX2dlbml1cyhhcnRpc3QsIGFsYnVtKQoKIyBBZGQgbmV3IGFsYnVtIGx5cmljcwppZihucm93KGRmX2x5cmljc19uZXcpID4gMCl7CiAgZGZfbHlyaWNzIDwtIHJiaW5kKGRmX2x5cmljcywgZGZfbHlyaWNzX25ldykKfSBlbHNlIGlmKG5yb3coZGZfbHlyaWNzKSA9PSAwKXsKICBkZl9seXJpY3MgPC0gZGZfbHlyaWNzX25ldwp9Cgp3cml0ZV9yZHMoZGZfbHlyaWNzLCBmaWxlX2x5cmljcywgY29tcHJlc3MgPSAiZ3oiKQpgYGAKCgpgYGB7cn0KZGZfbHlyaWNfZG94IDwtIGRmX2x5cmljcyAlPiUgCiAgZ3JvdXBfYnkoYXJ0aXN0LCBhbGJ1bSwgeWVhcl9hcHBlYXJhbmNlLCB0cmFja190aXRsZSwgdHJhY2tfbikgJT4lIAogIHN1bW1hcmlzZShseXJpYyA9IHBhc3RlMChseXJpYywgY29sbGFwc2UgPSAiIFxuIikpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShkb2NfaWQgPSByb3dfbnVtYmVyKCkpICU+JSAKICBkcGx5cjo6c2VsZWN0KGRvY19pZCwgdGV4dCA9IGx5cmljLCBldmVyeXRoaW5nKCkpCgpsZXZlbHNfYXJ0aXN0cyA8LSB1bmlxdWUoZGZfbHlyaWNfZG94JGFydGlzdCkKCmRmX2x5cmljX2RveCRhcnRpc3QgPC0gZmFjdG9yKGRmX2x5cmljX2RveCRhcnRpc3QsIGxldmVscyA9IGxldmVsc19hcnRpc3RzKQoKIyBDb252ZXJ0IGRmX3NvdXJjZSB0byBhIGNvcnB1czogZGZfY29ycHVzCmRmX3NvdXJjZSA8LSBEYXRhZnJhbWVTb3VyY2UoZGZfbHlyaWNfZG94KQpjb3JwdXNfbHlyaWNzIDwtIFZDb3JwdXMoZGZfc291cmNlKQoKY29ycHVzX2x5cmljcyAlPD4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHN0cmlwV2hpdGVzcGFjZSkpICU+JSAKICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcih0b2xvd2VyKSkgJT4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHJlbW92ZU51bWJlcnMpKSAlPiUgCiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIocmVtb3ZlUHVuY3R1YXRpb24pKSAlPiUgCiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBzdG9wd29yZHMoImVuZ2xpc2giKSkgJT4lIAogIHRtX21hcChyZW1vdmVXb3JkcywgYygiLSIsICIuLi4iKSkKYGBgCgpgYGB7ciBTZXR0aW5nIHVwIHRyYWluaW5nIGFuZCB0ZXN0IHNldH0Kc2V0LnNlZWQoNDIpCnF0eV90cmFpbiA8LSByb3VuZChsZW5ndGgoY29ycHVzX2x5cmljcykgKiAuOCwgMCkKaWR4X3RyYWluIDwtIHNhbXBsZSgxOmxlbmd0aChjb3JwdXNfbHlyaWNzKSwgcXR5X3RyYWluKQppZHhfdGVzdCA8LSBjKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpKVshYygxOmxlbmd0aChjb3JwdXNfbHlyaWNzKSkgJWluJSBpZHhfdHJhaW5dCgpjb3JwdXNfdHJhaW4gPC0gY29ycHVzX2x5cmljc1tpZHhfdHJhaW5dCmNvcnB1c190ZXN0IDwtIGNvcnB1c19seXJpY3NbaWR4X3Rlc3RdCmBgYAoKYGBge3IgQ3JlYXRpbmcgZG9jdW1lbnQgdGVybSBtYXRyaWNlc30KZHRtX3RyYWluIDwtIGFzLm1hdHJpeChEb2N1bWVudFRlcm1NYXRyaXgoY29ycHVzX3RyYWluLCBjb250cm9sPWxpc3Qod29yZExlbmd0aHM9YygxLEluZikpKSkKZHRtX3Rlc3QgPC0gYXMubWF0cml4KERvY3VtZW50VGVybU1hdHJpeChjb3JwdXNfdGVzdCwgY29udHJvbD1saXN0KHdvcmRMZW5ndGhzPWMoMSxJbmYpKSkpCmBgYAoKYGBge3IgQ29uZm9ybWluZyBEVE1zfQpkZl90cmFpbiA8LSBkYXRhLmZyYW1lKGR0bV90cmFpblssaW50ZXJzZWN0KGNvbG5hbWVzKGR0bV90cmFpbiksIGNvbG5hbWVzKGR0bV90ZXN0KSldKQpkZl90ZXN0IDwtIGRhdGEuZnJhbWUoZHRtX3Rlc3RbLGludGVyc2VjdChjb2xuYW1lcyhkdG1fdGVzdCksIGNvbG5hbWVzKGR0bV90cmFpbikpXSkKYGBgCgpgYGB7cn0KZGZfdHJhaW4kY29ycHVzIDwtIGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3RyYWluXQpkZl90ZXN0JGNvcnB1cyA8LSBkZl9seXJpY19kb3gkYXJ0aXN0W2lkeF90ZXN0XQpgYGAKCmBgYHtyIENyZWF0ZSBtb2RlbH0KZml0X21vZGVsIDwtIGtzdm0oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBrZXJuZWwgPSAicmJmZG90IikKZGZfcHJlZCA8LSBwcmVkaWN0KGZpdF9hcnRpc3RzLCBkZl90ZXN0LCB0eXBlID0gInByb2IiKQoKYGBgCmBgYHtyfQpmaXRfYXJ0aXN0cyA8LSB0cmFpbihjb3JwdXMgfiAuLCBkYXRhID0gZGZfdHJhaW4sIG1ldGhvZCA9ICJzdm1MaW5lYXIzIikKYGBgCgpgYGB7ciBQcmVkaWN0fQpkZl9wcmVkIDwtIHByZWRpY3QoZml0X2FydGlzdHMsIGRmX3Rlc3QpICMsIHR5cGUgPSAicHJvYiIpCmBgYAoKYGBge3J9Cm1hdHJpeF9jb25mdXNpb24gPC0gY29uZnVzaW9uTWF0cml4KGRmX3ByZWQsIGRmX3Rlc3QkY29ycHVzKQptYXRyaXhfY29uZnVzaW9uCmBgYApgYGB7cn0KbGlicmFyeShwZXJmb3JtYW5jZUVzdGltYXRpb24pCmNsYXNzaWZpY2F0aW9uTWV0cmljcyhkZl9hY2N1cmFjeSRhcnRpc3QsIGRmX2FjY3VyYWN5JHByZWRpY3Rpb24pCmBgYAoKYGBge3J9CmRmX2FjY3VyYWN5IDwtIGNiaW5kKGRmX2x5cmljX2RveFtpZHhfdGVzdCwgXSwKICAgICAgICAgICAgICAgICAgICAgcHJlZGljdGlvbiA9IGRmX3ByZWQpCmRmX2FjY3VyYWN5JGFjY3VyYWN5IDwtIGlmX2Vsc2UoZGZfYWNjdXJhY3kkcHJlZGljdGlvbiA9PSBkZl9hY2N1cmFjeSRhcnRpc3QsIDEsIDApCmBgYAoK</div>
 
 
 
