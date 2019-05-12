@@ -7,7 +7,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
-#library(magrittr)
+library(magrittr)
 library(genius)
 library(kernlab) 
 library(caret) 
@@ -21,7 +21,12 @@ file_lyrics <- paste0(dir_input, "df_lyrics.RDS")
 
 # Read albums and pre-processed lyrics
 df_albums <- read_csv2("https://raw.githubusercontent.com/mark-me/lyric_mining/master/artists_albums.csv")
-if(file.exists(file_lyrics))  df_lyrics <- read_rds(file_lyrics)
+if(file.exists(file_lyrics)){
+  df_lyrics <- read_rds(file_lyrics) 
+} else {
+  df_lyrics <- tibble(artist = character(0),
+                      album = character(0))
+}
 
 # See whether new albumn lyrics should be retrieved
 df_lyrics_new <- df_albums %>% 
@@ -29,13 +34,13 @@ df_lyrics_new <- df_albums %>%
   add_genius(artist, album)
 
 # Add new album lyrics
-if(exists("df_lyrics")){
+if(nrow(df_lyrics_new) > 0){
   df_lyrics <- rbind(df_lyrics, df_lyrics_new)
-} else if(nrow(df_lyrics_new) > 0){
+} else if(nrow(df_lyrics) == 0){
   df_lyrics <- df_lyrics_new
 }
 
-write_rds(df_lyrics, file_lyrics)
+write_rds(df_lyrics, file_lyrics, compress = "gz")
 ```
 
 
@@ -92,52 +97,34 @@ df_test$corpus <- df_lyric_dox$artist[idx_test]
 ```{r Create model}
 fit_model <- ksvm(corpus ~ ., data = df_train, kernel = "rbfdot")
 ```
+```{r}
+fit_artists <- train(corpus ~ ., data = df_train, method = "svmLinear3")
+```
 
 ```{r Predict}
-df_pred <- predict(fit_model, df_test)
+df_pred <- predict(fit_artists, df_test, type = "prob")
 ```
 
 ```{r}
 matrix_confusion <- confusionMatrix(df_pred, df_test$corpus)
-```
-
-# Caret
-
-```{r}
-# libraries needed by caret
-library(klaR)
-library(MASS)
-# for the Naive Bayes modelling
-library(caret)
-# to process the text into a corpus
-library(tm)
-# to get nice looking tables
-library(pander)
-# to simplify selections
-library(dplyr)
+matrix_confusion
 ```
 
 ```{r}
-# modified sligtly fron the code in the book
-# convert_counts <- function(x) {
-#     x <- ifelse(x > 0, 1, 0)
-#     x <- factor(x, levels = c(0, 1), labels = c("Absent", "Present"))
-# }
-# 
-# df_train %<>% apply(MARGIN=2, FUN=convert_counts)
-# df_test %<>% apply(MARGIN=2, FUN=convert_counts)
-```
+df_accuracy <- tibble(prediction = df_pred, artist = df_lyric_dox$artist[idx_test])
 
+df_accuracy$accuracy <- if_else(df_accuracy$prediction == df_accuracy$artist, 1, 0)
+round(prop.table(table(df_accuracy$accuracy)), 3)
 
-```{r}
-ctrl <- trainControl(method = "cv", 10)
-sms_model1 <- train(df_train, df_train$corpus, method = "nb", trControl = ctrl)
-```
+library(performanceEstimation)
+classificationMetrics(df_lyric_dox$artist[idx_test], df_pred)
 
-```{r}
-sms_model2 <- train(sms_train, sms_raw_train$type, method="nb", 
-                    tuneGrid=data.frame(.fL=1, .usekernel=FALSE),
-                trControl=ctrl)
-sms_model2
+most_common_misclassified_ratings = check_accuracy %>% filter(check_accuracy$accuracy == 0) %>%
+ group_by(rating) %>%
+ summarise(Count = n()) %>%
+ arrange(desc(Count)) %>%
+ head(3)
+##Most commong missclassified rating
+levels(train_dat$highest_rating)[most_common_misclassified_ratings$rating]
 ```
 
