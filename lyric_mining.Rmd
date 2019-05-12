@@ -20,7 +20,8 @@ dir_input <- paste0(getwd(),  "/Input/")
 file_lyrics <- paste0(dir_input, "df_lyrics.RDS")
 
 # Read albums and pre-processed lyrics
-df_albums <- read_csv2("https://raw.githubusercontent.com/mark-me/lyric_mining/master/artists_albums.csv")
+# df_albums <- read_csv2("https://raw.githubusercontent.com/mark-me/lyric_mining/master/artists_albums.csv")
+df_albums <- read_csv2("artists_albums.csv")
 if(file.exists(file_lyrics)){
   df_lyrics <- read_rds(file_lyrics) 
 } else {
