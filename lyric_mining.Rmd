@@ -44,6 +44,34 @@ if(nrow(df_lyrics_new) > 0){
 write_rds(df_lyrics, file_lyrics, compress = "gz")
 ```
 
+```{r}
+library(httr)		# Library for scraping web data
+library(jsonlite)	# Library for reading JSON data
+
+get_artist_albums <- function(name_artist){
+
+  name_artist <- "Neil Young"
+  url <- "http://ws.audioscrobbler.com/2.0/?"
+  method <- "method=artist.getTopAlbums"
+  parameter <- paste0("artist=", name_artist)
+  #no_artists <- "limit=100"
+  api_key <- "api_key=bd357ecfcaa0085f4948c273729f44f4"
+  format <- "format=json"
+  rest_request <- paste0(url, method, "&", parameter,"&", api_key, "&",format)
+  
+  # Executing REST request and getting josn text data
+  json <- GET( rest_request ) #, use_proxy("172.16.16.62", 8080))	# Executing request
+  json_text <- content(json, as="text")				# Get JSON text data
+  ls_albums <- fromJSON(json_text)				# loading text data in a list
+
+  df_albums <- ls_albums$topalbums$album
+  df_albums <- cbind(artist = rep(name_artist, nrow(df_albums)),
+                     album = df_albums$name) 
+  return(df_albums)
+}
+
+
+```
 
 ```{r}
 df_lyric_dox <- df_lyrics %>% 
