@@ -3,8 +3,6 @@ title: "Mining Lyrics"
 output: html_notebook
 ---
 
-
-
 ```{r}
 library(tidyverse)
 library(magrittr)
@@ -14,11 +12,10 @@ library(caret)
 library(tm) 
 library(splitstackshape)
 library(e1071)
-```
-```{r Functions for scraping data}
 library(httr)		# Library for scraping web data
 library(jsonlite)	# Library for reading JSON data
-
+```
+```{r Functions for scraping data}
 # Retrieving an artist's MusicBrainz ID from last.fm
 get_artist_mbid <- function(name_artist){
 
@@ -36,7 +33,8 @@ get_artist_mbid <- function(name_artist){
 
   return(ls_artist[1]$artist$mbid)
 }
-
+``` 
+```{r}
 # Retrieving an artist's studio albums from MusicBrainz
 get_artist_studio_albums <- function(artist_mbid){
   
@@ -44,7 +42,7 @@ get_artist_studio_albums <- function(artist_mbid){
   filter <- "?inc=release-groups"
   format <- "format=json"
   rest_request <- paste0(url, artist_mbid, filter, "&", format)
-
+  
   json <- GET( rest_request ) # , use_proxy("172.16.16.62", 8080))	# Executing request
   json_text <- content(json, as="text", encoding = "UTF-8")				# Get JSON text data
   ls_albums <- fromJSON(json_text)				# loading text data in a list
@@ -59,13 +57,14 @@ get_artist_studio_albums <- function(artist_mbid){
   
   df_albums %<>%
     filter(is.na(album_type)) %>% 
-    mutate(year_release = str_sub(date_release, 1, 4)) %>% 
+    mutate(year_release = str_sub(date_appearance, 1, 4)) %>% 
     select(artist, album, year_release)
   row.names(df_albums) <- NULL
   
   return(df_albums)
 }
-
+``` 
+```{r}
 # Retrieving an artist's studio albums from last.fm
 get_artist_albums <- function(name_artist){
 
@@ -91,52 +90,63 @@ get_artist_albums <- function(name_artist){
 ```
 
 ```{r}
-vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica", "Queen")
-artists_mbid <- sapply(vec_artists, get_artist_mbid)
+vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica")
 
-df_albums <- tibble(artist = character(0),
-                    album = character(0),
-                    year_release = character(0))
+df_artists <- tibble(artist = vec_artists,
+                     artist_mbid = sapply(vec_artists, get_artist_mbid))
+rm(vec_artists)
+```
+```{r}
+file_albums <- "artists_albums.csv"
 
-musicbrainz_json_may_fail <- function(artist_mbid) {
-  df_album <- get_artist_studio_albums(artist_mbid)
-  return(df_album)
+if(file.exists(file_albums)){
+  df_albums <- read_csv2(file_albums)
+} else {
+  df_albums <- tibble(artist = character(0),
+                      album = character(0),
+                      year_release = character(0))
 }
 
-for(artist_mbid in artists_mbid){
+artists_search <- df_artists$artist_mbid[!df_artists %in% df_albums$artist]
+```
+```{r}
+for(artist_mbid in artists_search){
 
-  reply <- NULL
+  df_artist_albums <- tibble(artist = character(0), album = character(0), year_release = character(0))
+  
   attempt <- 0
-  while( is.null(r) && attempt <= 20 ) {
+  while( (nrow(df_artist_albums) == 0 | is.null(df_artist_albums))
+         && attempt <= 99 ) {
     attempt <- attempt + 1
     try(
-      reply <- musicbrainz_json_may_fail(artist_mbid)
+      df_artist_albums <- get_artist_studio_albums(artist_mbid)
     )
-    if(!is.null(r)) print("That went well!")
-    Sys.sleep(1)
-  } 
-  df_albums <- rbind(df_albums, reply)
+    # Sys.sleep(1)
+  }
   
+  if(nrow(df_artist_albums) > 0) {
+    # Rename artist back to original form
+    name_artist <- df_artists$artist[df_artists$artist_mbid == artist_mbid]
+    df_artist_albums %<>%
+      mutate(artist = name_artist)
+  
+    df_albums <- rbind(df_albums, df_artist_albums)  
+  
+    print(paste0("Added ", name_artist, " - ", nrow(df_artist_albums), " albums"))
+  }
+    
 }
-
+rm(df_artist_albums)
 write_csv2(df_albums, "artists_albums.csv")
-
-table(df_albums$artist)
-#df_albums <- do.call("rbind", lapply(artists_mbid, get_artist_studio_albums))
 ```
 
 ```{r Loading data}
-dir_input <- paste0(getwd(),  "/Input/")
-file_lyrics <- paste0(dir_input, "df_lyrics.RDS")
-
 # Read albums and pre-processed lyrics
-# df_albums <- read_csv2("https://raw.githubusercontent.com/mark-me/lyric_mining/master/artists_albums.csv")
-# df_albums <- read_csv2("artists_albums.csv")
+file_lyrics <- "df_lyrics.RDS"
 if(file.exists(file_lyrics)){
   df_lyrics <- read_rds(file_lyrics) 
 } else {
-  df_lyrics <- tibble(artist = character(0),
-                      album = character(0))
+  df_lyrics <- tibble(artist = character(0), album = character(0))
 }
 
 # See whether new albumn lyrics should be retrieved
@@ -145,16 +155,23 @@ df_lyrics_new <- df_albums %>%
   add_genius(artist, album)
 
 # Add new album lyrics
-if(nrow(df_lyrics_new) > 0){
+if(nrow(df_lyrics) != 0){
   df_lyrics <- rbind(df_lyrics, df_lyrics_new)
-} else if(nrow(df_lyrics) == 0){
+} else {
   df_lyrics <- df_lyrics_new
 }
 
+# Write found lyrics
 write_rds(df_lyrics, file_lyrics, compress = "gz")
+
+# Albums without lyrics
+df_albums %>% 
+  anti_join(df_lyrics, by = c("artist", "album")) %>% 
+  knitr::kable()
 ```
 
 ```{r}
+# Create row per track, combining lyrics in one text field
 df_lyric_dox <- df_lyrics %>% 
   filter(!is.na(lyric)) %>% 
   group_by(artist, album, year_appearance, track_title, track_n) %>% 
@@ -163,14 +180,15 @@ df_lyric_dox <- df_lyrics %>%
   mutate(doc_id = row_number()) %>% 
   dplyr::select(doc_id, text = lyric, everything())
 
+# Make factor of artists for modelling
 levels_artists <- unique(df_lyric_dox$artist)
-
 df_lyric_dox$artist <- factor(df_lyric_dox$artist, levels = levels_artists)
 
 # Convert df_source to a corpus: df_corpus
 df_source <- VectorSource(df_lyric_dox$text)
 corpus_lyrics <- Corpus(df_source)
 
+# Clean corpus
 corpus_lyrics %<>% 
   tm_map(removeWords, c("-", "...", "NA", "character")) %>% 
   tm_map(content_transformer(tolower)) %>% 
@@ -181,6 +199,7 @@ corpus_lyrics %<>%
 
 ```
 ```{r}
+# Create document term and term document matrices
 dtm_lyrics <- DocumentTermMatrix(corpus_lyrics)
 tdm_lyrics <- TermDocumentMatrix(corpus_lyrics)
 ```

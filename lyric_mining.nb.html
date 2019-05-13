@@ -246,23 +246,174 @@ $(document).ready(function () {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShtYWdyaXR0cilcblxuYGBgIn0= -->
-<pre class="r"><code>library(magrittr)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KG1hZ3JpdHRyKVxubGlicmFyeShnZW5pdXMpXG5saWJyYXJ5KGtlcm5sYWIpIFxubGlicmFyeShjYXJldCkgXG5saWJyYXJ5KHRtKSBcbmxpYnJhcnkoc3BsaXRzdGFja3NoYXBlKVxubGlicmFyeShlMTA3MSlcbmxpYnJhcnkoaHR0cilcdFx0IyBMaWJyYXJ5IGZvciBzY3JhcGluZyB3ZWIgZGF0YVxubGlicmFyeShqc29ubGl0ZSlcdCMgTGlicmFyeSBmb3IgcmVhZGluZyBKU09OIGRhdGFcbmBgYCJ9 -->
+<pre class="r"><code>library(tidyverse)
+library(magrittr)
+library(genius)
+library(kernlab) 
+library(caret) 
+library(tm) 
+library(splitstackshape)
+library(e1071)
+library(httr)       # Library for scraping web data
+library(jsonlite)   # Library for reading JSON data</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBSZXRyaWV2aW5nIGFuIGFydGlzdCdzIE11c2ljQnJhaW56IElEIGZyb20gbGFzdC5mbVxuZ2V0X2FydGlzdF9tYmlkIDwtIGZ1bmN0aW9uKG5hbWVfYXJ0aXN0KXtcbiAgdXJsIDwtIFwiaHR0cDovL3dzLmF1ZGlvc2Nyb2JibGVyLmNvbS8yLjAvP1wiXG4gIG1ldGhvZCA8LSBcIm1ldGhvZD1hcnRpc3QuZ2V0SW5mb1wiXG4gIHBhcmFtZXRlciA8LSBwYXN0ZTAoXCJhcnRpc3Q9XCIsIG5hbWVfYXJ0aXN0KVxuICBhcGlfa2V5IDwtIFwiYXBpX2tleT1iZDM1N2VjZmNhYTAwODVmNDk0OGMyNzM3MjlmNDRmNFwiXG4gIGZvcm1hdCA8LSBcImZvcm1hdD1qc29uXCJcbiAgcXR5X2FsYnVtcyA8LSBcImxpbWl0PTFcIlxuICByZXN0X3JlcXVlc3QgPC0gcGFzdGUwKHVybCwgcGFzdGUobWV0aG9kLCBwYXJhbWV0ZXIsIGFwaV9rZXksIGZvcm1hdCwgc2VwID0gXCImXCIpKVxuICBcbiAganNvbiA8LSBHRVQoIHJlc3RfcmVxdWVzdCApICMsIHVzZV9wcm94eShcIjE3Mi4xNi4xNi42MlwiLCA4MDgwKSlcdCMgRXhlY3V0aW5nIHJlcXVlc3RcbiAganNvbl90ZXh0IDwtIGNvbnRlbnQoanNvbiwgYXM9XCJ0ZXh0XCIsIGVuY29kaW5nID0gXCJVVEYtOFwiKVx0XHRcdFx0IyBHZXQgSlNPTiB0ZXh0IGRhdGFcbiAgbHNfYXJ0aXN0IDwtIGZyb21KU09OKGpzb25fdGV4dClcdFx0XHRcdCMgbG9hZGluZyB0ZXh0IGRhdGEgaW4gYSBsaXN0XG4gIHJldHVybihsc19hcnRpc3RbMV0kYXJ0aXN0JG1iaWQpXG59XG5gYGAifQ== -->
+<pre class="r"><code># Retrieving an artist's MusicBrainz ID from last.fm
+get_artist_mbid &lt;- function(name_artist){
+  url &lt;- &quot;http://ws.audioscrobbler.com/2.0/?&quot;
+  method &lt;- &quot;method=artist.getInfo&quot;
+  parameter &lt;- paste0(&quot;artist=&quot;, name_artist)
+  api_key &lt;- &quot;api_key=bd357ecfcaa0085f4948c273729f44f4&quot;
+  format &lt;- &quot;format=json&quot;
+  qty_albums &lt;- &quot;limit=1&quot;
+  rest_request &lt;- paste0(url, paste(method, parameter, api_key, format, sep = &quot;&amp;&quot;))
+  
+  json &lt;- GET( rest_request ) #, use_proxy(&quot;172.16.16.62&quot;, 8080))   # Executing request
+  json_text &lt;- content(json, as=&quot;text&quot;, encoding = &quot;UTF-8&quot;)             # Get JSON text data
+  ls_artist &lt;- fromJSON(json_text)              # loading text data in a list
+  return(ls_artist[1]$artist$mbid)
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBSZXRyaWV2aW5nIGFuIGFydGlzdCdzIHN0dWRpbyBhbGJ1bXMgZnJvbSBNdXNpY0JyYWluelxuZ2V0X2FydGlzdF9zdHVkaW9fYWxidW1zIDwtIGZ1bmN0aW9uKGFydGlzdF9tYmlkKXtcbiAgXG4gIHVybCA8LSBcImh0dHA6Ly9tdXNpY2JyYWluei5vcmcvd3MvMi9hcnRpc3QvXCJcbiAgZmlsdGVyIDwtIFwiP2luYz1yZWxlYXNlLWdyb3Vwc1wiXG4gIGZvcm1hdCA8LSBcImZvcm1hdD1qc29uXCJcbiAgcmVzdF9yZXF1ZXN0IDwtIHBhc3RlMCh1cmwsIGFydGlzdF9tYmlkLCBmaWx0ZXIsIFwiJlwiLCBmb3JtYXQpXG4gIFxuICBqc29uIDwtIEdFVCggcmVzdF9yZXF1ZXN0ICkgIyAsIHVzZV9wcm94eShcIjE3Mi4xNi4xNi42MlwiLCA4MDgwKSlcdCMgRXhlY3V0aW5nIHJlcXVlc3RcbiAganNvbl90ZXh0IDwtIGNvbnRlbnQoanNvbiwgYXM9XCJ0ZXh0XCIsIGVuY29kaW5nID0gXCJVVEYtOFwiKVx0XHRcdFx0IyBHZXQgSlNPTiB0ZXh0IGRhdGFcbiAgbHNfYWxidW1zIDwtIGZyb21KU09OKGpzb25fdGV4dClcdFx0XHRcdCMgbG9hZGluZyB0ZXh0IGRhdGEgaW4gYSBsaXN0XG4gIFxuICBsc19hbGJ1bV90eXBlcyA8LSBsc19hbGJ1bXMkYHJlbGVhc2UtZ3JvdXBzYCRgc2Vjb25kYXJ5LXR5cGVzYFxuICBsc19hbGJ1bV90eXBlcyA8LSBsYXBwbHkobHNfYWxidW1fdHlwZXMsIGZ1bmN0aW9uKHgpIGlmZWxzZShpcy5udWxsKHgpLCBOQSwgeCkpXG4gIFxuICBkZl9hbGJ1bXMgPC0gdGliYmxlKGFydGlzdCA9IHJlcChsc19hbGJ1bXMkYHNvcnQtbmFtZWAsIG5yb3cobHNfYWxidW1zJGByZWxlYXNlLWdyb3Vwc2ApKSxcbiAgICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGxzX2FsYnVtcyRgcmVsZWFzZS1ncm91cHNgJHRpdGxlLFxuICAgICAgICAgICAgICAgICAgICAgIGRhdGVfYXBwZWFyYW5jZSA9IGxzX2FsYnVtcyRgcmVsZWFzZS1ncm91cHNgJGBmaXJzdC1yZWxlYXNlLWRhdGVgLFxuICAgICAgICAgICAgICAgICAgICAgIGFsYnVtX3R5cGUgPSB1bmxpc3QobHNfYWxidW1fdHlwZXMpKVxuICBcbiAgZGZfYWxidW1zICU8PiVcbiAgICBmaWx0ZXIoaXMubmEoYWxidW1fdHlwZSkpICU+JSBcbiAgICBtdXRhdGUoeWVhcl9yZWxlYXNlID0gc3RyX3N1YihkYXRlX2FwcGVhcmFuY2UsIDEsIDQpKSAlPiUgXG4gICAgc2VsZWN0KGFydGlzdCwgYWxidW0sIHllYXJfcmVsZWFzZSlcbiAgcm93Lm5hbWVzKGRmX2FsYnVtcykgPC0gTlVMTFxuICBcbiAgcmV0dXJuKGRmX2FsYnVtcylcbn1cbmBgYCJ9 -->
+<pre class="r"><code># Retrieving an artist's studio albums from MusicBrainz
+get_artist_studio_albums &lt;- function(artist_mbid){
+  
+  url &lt;- &quot;http://musicbrainz.org/ws/2/artist/&quot;
+  filter &lt;- &quot;?inc=release-groups&quot;
+  format &lt;- &quot;format=json&quot;
+  rest_request &lt;- paste0(url, artist_mbid, filter, &quot;&amp;&quot;, format)
+  
+  json &lt;- GET( rest_request ) # , use_proxy(&quot;172.16.16.62&quot;, 8080))  # Executing request
+  json_text &lt;- content(json, as=&quot;text&quot;, encoding = &quot;UTF-8&quot;)             # Get JSON text data
+  ls_albums &lt;- fromJSON(json_text)              # loading text data in a list
+  
+  ls_album_types &lt;- ls_albums$`release-groups`$`secondary-types`
+  ls_album_types &lt;- lapply(ls_album_types, function(x) ifelse(is.null(x), NA, x))
+  
+  df_albums &lt;- tibble(artist = rep(ls_albums$`sort-name`, nrow(ls_albums$`release-groups`)),
+                      album = ls_albums$`release-groups`$title,
+                      date_appearance = ls_albums$`release-groups`$`first-release-date`,
+                      album_type = unlist(ls_album_types))
+  
+  df_albums %&lt;&gt;%
+    filter(is.na(album_type)) %&gt;% 
+    mutate(year_release = str_sub(date_appearance, 1, 4)) %&gt;% 
+    select(artist, album, year_release)
+  row.names(df_albums) &lt;- NULL
+  
+  return(df_albums)
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBSZXRyaWV2aW5nIGFuIGFydGlzdCdzIHN0dWRpbyBhbGJ1bXMgZnJvbSBsYXN0LmZtXG5nZXRfYXJ0aXN0X2FsYnVtcyA8LSBmdW5jdGlvbihuYW1lX2FydGlzdCl7XG4gIHVybCA8LSBcImh0dHA6Ly93cy5hdWRpb3Njcm9iYmxlci5jb20vMi4wLz9cIlxuICBtZXRob2QgPC0gXCJtZXRob2Q9YXJ0aXN0LmdldFRvcEFsYnVtc1wiXG4gIHBhcmFtZXRlciA8LSBwYXN0ZTAoXCJhcnRpc3Q9XCIsIG5hbWVfYXJ0aXN0KVxuICBhcGlfa2V5IDwtIFwiYXBpX2tleT1iZDM1N2VjZmNhYTAwODVmNDk0OGMyNzM3MjlmNDRmNFwiXG4gIGZvcm1hdCA8LSBcImZvcm1hdD1qc29uXCJcbiAgcXR5X2FsYnVtcyA8LSBcImxpbWl0PTE1MFwiXG4gIHJlc3RfcmVxdWVzdCA8LSBwYXN0ZTAodXJsLCBwYXN0ZShtZXRob2QsIHBhcmFtZXRlciwgYXBpX2tleSwgZm9ybWF0LCBkZWxpbWl0ZXIgPSBcIiZcIikpXG4gIFxuICAjIEV4ZWN1dGluZyBSRVNUIHJlcXVlc3QgYW5kIGdldHRpbmcgam9zbiB0ZXh0IGRhdGFcbiAganNvbiA8LSBHRVQoIHJlc3RfcmVxdWVzdCApICMsIHVzZV9wcm94eShcIjE3Mi4xNi4xNi42MlwiLCA4MDgwKSlcdCMgRXhlY3V0aW5nIHJlcXVlc3RcbiAganNvbl90ZXh0IDwtIGNvbnRlbnQoanNvbiwgYXMgPSBcInRleHRcIilcdFx0XHRcdCMgR2V0IEpTT04gdGV4dCBkYXRhXG4gIGxzX2FsYnVtcyA8LSBmcm9tSlNPTihqc29uX3RleHQpXHRcdFx0XHQjIGxvYWRpbmcgdGV4dCBkYXRhIGluIGEgbGlzdFxuICBkZl9hbGJ1bXMgPC0gbHNfYWxidW1zJHRvcGFsYnVtcyRhbGJ1bVxuICBkZl9hbGJ1bXMgPC0gYXMudGliYmxlKGNiaW5kKGFydGlzdCA9IHJlcChuYW1lX2FydGlzdCwgbnJvdyhkZl9hbGJ1bXMpKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGRmX2FsYnVtcyRuYW1lKSlcbiAgcmV0dXJuKGRmX2FsYnVtcylcbn1cbmBgYCJ9 -->
+<pre class="r"><code># Retrieving an artist's studio albums from last.fm
+get_artist_albums &lt;- function(name_artist){
+  url &lt;- &quot;http://ws.audioscrobbler.com/2.0/?&quot;
+  method &lt;- &quot;method=artist.getTopAlbums&quot;
+  parameter &lt;- paste0(&quot;artist=&quot;, name_artist)
+  api_key &lt;- &quot;api_key=bd357ecfcaa0085f4948c273729f44f4&quot;
+  format &lt;- &quot;format=json&quot;
+  qty_albums &lt;- &quot;limit=150&quot;
+  rest_request &lt;- paste0(url, paste(method, parameter, api_key, format, delimiter = &quot;&amp;&quot;))
+  
+  # Executing REST request and getting josn text data
+  json &lt;- GET( rest_request ) #, use_proxy(&quot;172.16.16.62&quot;, 8080))   # Executing request
+  json_text &lt;- content(json, as = &quot;text&quot;)               # Get JSON text data
+  ls_albums &lt;- fromJSON(json_text)              # loading text data in a list
+  df_albums &lt;- ls_albums$topalbums$album
+  df_albums &lt;- as.tibble(cbind(artist = rep(name_artist, nrow(df_albums)),
+                               album = df_albums$name))
+  return(df_albums)
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmVjX2FydGlzdHMgPC0gYyhcIlRpbmRlcnN0aWNrc1wiLCBcIlRvbSBXYWl0c1wiLCBcIk5pY2sgQ2F2ZSBhbmQgVGhlIEJhZCBTZWVkc1wiLCBcIlZhbmlsbGEgSWNlXCIsIFwiVGhlIE5hdGlvbmFsXCIsIFwiTWV0YWxsaWNhXCIpXG5kZl9hcnRpc3RzIDwtIHRpYmJsZShhcnRpc3QgPSB2ZWNfYXJ0aXN0cyxcbiAgICAgICAgICAgICAgICAgICAgIGFydGlzdF9tYmlkID0gc2FwcGx5KHZlY19hcnRpc3RzLCBnZXRfYXJ0aXN0X21iaWQpKVxucm0odmVjX2FydGlzdHMpXG5gYGAifQ== -->
+<pre class="r"><code>vec_artists &lt;- c(&quot;Tindersticks&quot;, &quot;Tom Waits&quot;, &quot;Nick Cave and The Bad Seeds&quot;, &quot;Vanilla Ice&quot;, &quot;The National&quot;, &quot;Metallica&quot;)
+df_artists &lt;- tibble(artist = vec_artists,
+                     artist_mbid = sapply(vec_artists, get_artist_mbid))
+rm(vec_artists)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlsZV9hbGJ1bXMgPC0gXCJhcnRpc3RzX2FsYnVtcy5jc3ZcIlxuaWYoZmlsZS5leGlzdHMoZmlsZV9hbGJ1bXMpKXtcbiAgZGZfYWxidW1zIDwtIHJlYWRfY3N2MihmaWxlX2FsYnVtcylcbn0gZWxzZSB7XG4gIGRmX2FsYnVtcyA8LSB0aWJibGUoYXJ0aXN0ID0gY2hhcmFjdGVyKDApLFxuICAgICAgICAgICAgICAgICAgICAgIGFsYnVtID0gY2hhcmFjdGVyKDApLFxuICAgICAgICAgICAgICAgICAgICAgIHllYXJfcmVsZWFzZSA9IGNoYXJhY3RlcigwKSlcbn1cbmBgYCJ9 -->
+<pre class="r"><code>file_albums &lt;- &quot;artists_albums.csv&quot;
+if(file.exists(file_albums)){
+  df_albums &lt;- read_csv2(file_albums)
+} else {
+  df_albums &lt;- tibble(artist = character(0),
+                      album = character(0),
+                      year_release = character(0))
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVXNpbmcgJywnIGFzIGRlY2ltYWwgYW5kICcuJyBhcyBncm91cGluZyBtYXJrLiBVc2UgcmVhZF9kZWxpbSgpIGZvciBtb3JlIGNvbnRyb2wuXG5QYXJzZWQgd2l0aCBjb2x1bW4gc3BlY2lmaWNhdGlvbjpcbmNvbHMoXG4gIGFydGlzdCA9IFx1MDAxYlszMW1jb2xfY2hhcmFjdGVyKClcdTAwMWJbMzltLFxuICBhbGJ1bSA9IFx1MDAxYlszMW1jb2xfY2hhcmFjdGVyKClcdTAwMWJbMzltLFxuICB5ZWFyX3JlbGVhc2UgPSBcdTAwMWJbMzJtY29sX2RvdWJsZSgpXHUwMDFiWzM5bVxuKVxuIn0= -->
+<pre><code>Using ',' as decimal and '.' as grouping mark. Use read_delim() for more control.
+Parsed with column specification:
+cols(
+  artist = [31mcol_character()[39m,
+  album = [31mcol_character()[39m,
+  year_release = [32mcol_double()[39m
+)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYXJ0aXN0c19zZWFyY2ggPC0gZGZfYXJ0aXN0cyRhcnRpc3RfbWJpZFshZGZfYXJ0aXN0cyAlaW4lIGRmX2FsYnVtcyRhcnRpc3RdXG5gYGAifQ== -->
+<pre class="r"><code>artists_search &lt;- df_artists$artist_mbid[!df_artists %in% df_albums$artist]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZm9yKGFydGlzdF9tYmlkIGluIGFydGlzdHNfc2VhcmNoKXtcbiAgZGZfYXJ0aXN0X2FsYnVtcyA8LSB0aWJibGUoYXJ0aXN0ID0gY2hhcmFjdGVyKDApLCBhbGJ1bSA9IGNoYXJhY3RlcigwKSwgeWVhcl9yZWxlYXNlID0gY2hhcmFjdGVyKDApKVxuICBcbiAgYXR0ZW1wdCA8LSAwXG4gIHdoaWxlKCAobnJvdyhkZl9hcnRpc3RfYWxidW1zKSA9PSAwIHwgaXMubnVsbChkZl9hcnRpc3RfYWxidW1zKSlcbiAgICAgICAgICYmIGF0dGVtcHQgPD0gOTkgKSB7XG4gICAgYXR0ZW1wdCA8LSBhdHRlbXB0ICsgMVxuICAgIHRyeShcbiAgICAgIGRmX2FydGlzdF9hbGJ1bXMgPC0gZ2V0X2FydGlzdF9zdHVkaW9fYWxidW1zKGFydGlzdF9tYmlkKVxuICAgIClcbiAgICAjIFN5cy5zbGVlcCgxKVxuICB9XG4gIFxuICBpZihucm93KGRmX2FydGlzdF9hbGJ1bXMpID4gMCkge1xuICAgICMgUmVuYW1lIGFydGlzdCBiYWNrIHRvIG9yaWdpbmFsIGZvcm1cbiAgICBuYW1lX2FydGlzdCA8LSBkZl9hcnRpc3RzJGFydGlzdFtkZl9hcnRpc3RzJGFydGlzdF9tYmlkID09IGFydGlzdF9tYmlkXVxuICAgIGRmX2FydGlzdF9hbGJ1bXMgJTw+JVxuICAgICAgbXV0YXRlKGFydGlzdCA9IG5hbWVfYXJ0aXN0KVxuICBcbiAgICBkZl9hbGJ1bXMgPC0gcmJpbmQoZGZfYWxidW1zLCBkZl9hcnRpc3RfYWxidW1zKSAgXG4gIFxuICAgIHByaW50KHBhc3RlMChcIkFkZGVkIFwiLCBuYW1lX2FydGlzdCwgXCIgLSBcIiwgbnJvdyhkZl9hcnRpc3RfYWxidW1zKSwgXCIgYWxidW1zXCIpKVxuICB9XG4gICAgXG59XG5cbmBgYCJ9 -->
+<pre class="r"><code>for(artist_mbid in artists_search){
+  df_artist_albums &lt;- tibble(artist = character(0), album = character(0), year_release = character(0))
+  
+  attempt &lt;- 0
+  while( (nrow(df_artist_albums) == 0 | is.null(df_artist_albums))
+         &amp;&amp; attempt &lt;= 99 ) {
+    attempt &lt;- attempt + 1
+    try(
+      df_artist_albums &lt;- get_artist_studio_albums(artist_mbid)
+    )
+    # Sys.sleep(1)
+  }
+  
+  if(nrow(df_artist_albums) &gt; 0) {
+    # Rename artist back to original form
+    name_artist &lt;- df_artists$artist[df_artists$artist_mbid == artist_mbid]
+    df_artist_albums %&lt;&gt;%
+      mutate(artist = name_artist)
+  
+    df_albums &lt;- rbind(df_albums, df_artist_albums)  
+  
+    print(paste0(&quot;Added &quot;, name_artist, &quot; - &quot;, nrow(df_artist_albums), &quot; albums&quot;))
+  }
+    
+}
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog4oCYbWFncml0dHLigJlcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpwdXJycuKAmTpcblxuICAgIHNldF9uYW1lc1xuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDigJhwYWNrYWdlOnRpZHly4oCZOlxuXG4gICAgZXh0cmFjdFxuIn0= -->
-<pre><code>
-Attaching package: ‘magrittr’
-
-The following object is masked from ‘package:purrr’:
-
-    set_names
-
-The following object is masked from ‘package:tidyr’:
-
-    extract</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiQWRkZWQgVGluZGVyc3RpY2tzIC0gMTIgYWxidW1zXCJcbiJ9 -->
+<pre><code>[1] &quot;Added Tindersticks - 12 albums&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgOiBsZXhpY2FsIGVycm9yOiBpbnZhbGlkIGNoYXIgaW4ganNvbiB0ZXh0LlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94bWwgdmVyc2lvbj1cIjEuMFwiIGVuY29kaW5nPVwiVVxuICAgICAgICAgICAgICAgICAgICAgKHJpZ2h0IGhlcmUpIC0tLS0tLV5cbiJ9 -->
+<pre><code>Error : lexical error: invalid char in json text.
+                                       &lt;?xml version=&quot;1.0&quot; encoding=&quot;U
+                     (right here) ------^</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiQWRkZWQgVG9tIFdhaXRzIC0gMjQgYWxidW1zXCJcblsxXSBcIkFkZGVkIE5pY2sgQ2F2ZSBhbmQgVGhlIEJhZCBTZWVkcyAtIDE2IGFsYnVtc1wiXG5bMV0gXCJBZGRlZCBWYW5pbGxhIEljZSAtIDE0IGFsYnVtc1wiXG5bMV0gXCJBZGRlZCBUaGUgTmF0aW9uYWwgLSAxMyBhbGJ1bXNcIlxuWzFdIFwiQWRkZWQgTWV0YWxsaWNhIC0gMTQgYWxidW1zXCJcbiJ9 -->
+<pre><code>[1] &quot;Added Tom Waits - 24 albums&quot;
+[1] &quot;Added Nick Cave and The Bad Seeds - 16 albums&quot;
+[1] &quot;Added Vanilla Ice - 14 albums&quot;
+[1] &quot;Added The National - 13 albums&quot;
+[1] &quot;Added Metallica - 14 albums&quot;</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBTZWUgd2hldGhlciBuZXcgYWxidW1uIGx5cmljcyBzaG91bGQgYmUgcmV0cmlldmVkXG5kZl9seXJpY3NfbmV3IDwtIGRmX2FsYnVtcyAlPiUgXG4gIGFudGlfam9pbihkZl9seXJpY3MsIGJ5ID0gYyhcImFydGlzdFwiLCBcImFsYnVtXCIpKSAlPiUgXG4gIGFkZF9nZW5pdXMoYXJ0aXN0LCBhbGJ1bSlcblxuYGBgIn0= -->
 <pre class="r"><code># See whether new albumn lyrics should be retrieved
@@ -271,95 +422,83 @@ df_lyrics_new &lt;- df_albums %&gt;%
   add_genius(artist, album)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiTm90IEZvdW5kIChIVFRQIDQwNCkuTm90IEZvdW5kIChIVFRQIDQwNCkuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcImFydGlzdFwiLCBcImFsYnVtXCIsIFwieWVhcl9hcHBlYXJhbmNlXCIpXG4ifQ== -->
-<pre><code>Not Found (HTTP 404).Not Found (HTTP 404).Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuSm9pbmluZywgYnkgPSBjKFwidHJhY2tfdGl0bGVcIiwgXCJ0cmFja19uXCIsIFwidHJhY2tfdXJsXCIpXG5Kb2luaW5nLCBieSA9IGMoXCJ0cmFja190aXRsZVwiLCBcInRyYWNrX25cIiwgXCJ0cmFja191cmxcIilcbkpvaW5pbmcsIGJ5ID0gYyhcInRyYWNrX3RpdGxlXCIsIFwidHJhY2tfblwiLCBcInRyYWNrX3VybFwiKVxuIn0= -->
+<pre><code>Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
 Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
 Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
 Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
 Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)
-Joining, by = c(&quot;artist&quot;, &quot;album&quot;, &quot;year_appearance&quot;)</code></pre>
+Joining, by = c(&quot;track_title&quot;, &quot;track_n&quot;, &quot;track_url&quot;)</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfYWxidW1zICU+JSBcbiAgYW50aV9qb2luKGRmX2x5cmljcywgYnkgPSBjKFwiYXJ0aXN0XCIsIFwiYWxidW1cIikpXG5gYGAifQ== -->
-<pre class="r"><code>df_albums %&gt;% 
-  anti_join(df_lyrics, by = c(&quot;artist&quot;, &quot;album&quot;))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInNwZWNfdGJsX2RmIiwidGJsX2RmIiwidGJsIiwiZGF0YS5mcmFtZSJdLCJuY29sIjozLCJucm93IjoxM30sInJkZiI6IlVrUllNd3BZQ2dBQUFBTUFBd1lBQUFNRkFBQUFBQVZWVkVZdE9BQUFCQUlBQUFBQkFBUUFDUUFBQUFGNEFBQURFd0FBQUFNQUFBQVFBQUFBRFFBRUFBa0FBQUFaVG1samF5QkRZWFpsSUNZZ1ZHaGxJRUpoWkNCVFpXVmtjd0FFQUFrQUFBQVpUbWxqYXlCRFlYWmxJQ1lnVkdobElFSmhaQ0JUWldWa2N3QUVBQWtBQUFBTVZHbHVaR1Z5YzNScFkydHpBQVFBQ1FBQUFBeFVhVzVrWlhKemRHbGphM01BQkFBSkFBQUFERlJwYm1SbGNuTjBhV05yY3dBRUFBa0FBQUFNVkdsdVpHVnljM1JwWTJ0ekFBUUFDUUFBQUF4VWFXNWtaWEp6ZEdsamEzTUFCQUFKQUFBQURGUnBibVJsY25OMGFXTnJjd0FFQUFrQUFBQU1WR2x1WkdWeWMzUnBZMnR6QUFRQUNRQUFBQXhVYVc1a1pYSnpkR2xqYTNNQUJBQUpBQUFBREZScGJtUmxjbk4wYVdOcmN3QUVBQWtBQUFBTVZHbHVaR1Z5YzNScFkydHpBQVFBQ1FBQUFBeFVhVzVrWlhKemRHbGphM01BQUFBUUFBQUFEUUFFQUFrQUFBQU5TR1Z1Y25rbmN5QkVjbVZoYlFBRUFBa0FBQUFTVkdobElFSnZZWFJ0WVc0bmN5QkRZV3hzQUFRQUNRQUFBQnhVYUdVZ1JtbHljM1FnVkdsdVpHVnljM1JwWTJ0eklFRnNZblZ0QUFRQUNRQUFBQXhVYVc1a1pYSnpkR2xqYTNNQUJBQUpBQUFBRDFOcGJYQnNaU0JRYkdWaGMzVnlaUUFFQUFrQUFBQUlRM1Z5ZEdGcGJuTUFCQUFKQUFBQUNFdGhkR2hzWldWdUFBUUFDUUFBQUE5RFlXNGdUM1Z5SUV4dmRtVXVMaTRBQkFBSkFBQUFGRmRoYVhScGJtY2dabTl5SUhSb1pTQk5iMjl1QUFRQUNRQUFBQTVVYUdVZ1NIVnVaM0o1SUZOaGR3QUVBQWtBQUFBWFJtRnNiR2x1WnlCRWIzZHVJR0VnVFc5MWJuUmhhVzRBQkFBSkFBQUFFbFJvWlNCVGIyMWxkR2hwYm1jZ1VtRnBiZ0FFQUFrQUFBQVFWR2hsSUZkaGFYUnBibWNnVW05dmJRQUFBQTRBQUFBTlFKOGdBQUFBQUFCQW56UUFBQUFBQUVDZkpBQUFBQUFBUUo4c0FBQUFBQUJBbnp3QUFBQUFBRUNmTkFBQUFBQUFRSjhvQUFBQUFBQkFuMFFBQUFBQUFFQ2ZUQUFBQUFBQVFKOWdBQUFBQUFCQW4yZ0FBQUFBQUVDZmNBQUFBQUFBUUorQUFBQUFBQUFBQUFRQ0FBQUFBUUFFQUFrQUFBQUZZMnhoYzNNQUFBQVFBQUFBQVFBRUFBa0FBQUFLWkdGMFlTNW1jbUZ0WlFBQUJBSUFBQUFCQUFRQUNRQUFBQWx5YjNjdWJtRnRaWE1BQUFBTkFBQUFBb0FBQUFELy8vL3pBQUFFQWdBQUFBRUFCQUFKQUFBQUJXNWhiV1Z6QUFBQUVBQUFBQU1BQkFBSkFBQUFCbUZ5ZEdsemRBQUVBQWtBQUFBRllXeGlkVzBBQkFBSkFBQUFEM2xsWVhKZllYQndaV0Z5WVc1alpRQUFBUDRBQUFRQ0FBQUFBUUFFQUFrQUFBQUhiM0IwYVc5dWN3QUFBaE1BQUFBRkFBQUFFQUFBQUFFQUJBQUpBQUFBQVhJQUFBQVFBQUFBQVFBRUFBa0FBQUFNVEc5aFpHbHVaeUJrWVhSaEFBQUFDZ0FBQUFFQUFBQUFBQUFBRFFBQUFBRUFBQUFOQUFBQURRQUFBQUVBQUFBREFBQUVBZ0FBQlA4QUFBQVFBQUFBQlFBRUFBa0FBQUFHWlc1bmFXNWxBQVFBQ1FBQUFBVnNZV0psYkFBRUFBa0FBQUFPY205M2JtRnRaWE11Y0hKcGJuUUFCQUFKQUFBQUNuSnZkM011ZEc5MFlXd0FCQUFKQUFBQUNtTnZiSE11ZEc5MFlXd0FBQUQrQUFBQS9nPT0ifQ== -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["artist"],"name":[1],"type":["chr"],"align":["left"]},{"label":["album"],"name":[2],"type":["chr"],"align":["left"]},{"label":["year_appearance"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"Nick Cave & The Bad Seeds","2":"Henry's Dream","3":"1992"},{"1":"Nick Cave & The Bad Seeds","2":"The Boatman's Call","3":"1997"},{"1":"Tindersticks","2":"The First Tindersticks Album","3":"1993"},{"1":"Tindersticks","2":"Tindersticks","3":"1995"},{"1":"Tindersticks","2":"Simple Pleasure","3":"1999"},{"1":"Tindersticks","2":"Curtains","3":"1997"},{"1":"Tindersticks","2":"Kathleen","3":"1994"},{"1":"Tindersticks","2":"Can Our Love...","3":"2001"},{"1":"Tindersticks","2":"Waiting for the Moon","3":"2003"},{"1":"Tindersticks","2":"The Hungry Saw","3":"2008"},{"1":"Tindersticks","2":"Falling Down a Mountain","3":"2010"},{"1":"Tindersticks","2":"The Something Rain","3":"2012"},{"1":"Tindersticks","2":"The Waiting Room","3":"2016"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[13]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShodHRyKVx0XHQjIExpYnJhcnkgZm9yIHNjcmFwaW5nIHdlYiBkYXRhXG5saWJyYXJ5KGpzb25saXRlKVx0IyBMaWJyYXJ5IGZvciByZWFkaW5nIEpTT04gZGF0YVxuXG5nZXRfYXJ0aXN0X2FsYnVtcyA8LSBmdW5jdGlvbihuYW1lX2FydGlzdCl7XG5cbiAgbmFtZV9hcnRpc3QgPC0gXCJOZWlsIFlvdW5nXCJcbiAgdXJsIDwtIFwiaHR0cDovL3dzLmF1ZGlvc2Nyb2JibGVyLmNvbS8yLjAvP1wiXG4gIG1ldGhvZCA8LSBcIm1ldGhvZD1hcnRpc3QuZ2V0VG9wQWxidW1zXCJcbiAgcGFyYW1ldGVyIDwtIHBhc3RlMChcImFydGlzdD1cIiwgbmFtZV9hcnRpc3QpXG4gICNub19hcnRpc3RzIDwtIFwibGltaXQ9MTAwXCJcbiAgYXBpX2tleSA8LSBcImFwaV9rZXk9YmQzNTdlY2ZjYWEwMDg1ZjQ5NDhjMjczNzI5ZjQ0ZjRcIlxuICBmb3JtYXQgPC0gXCJmb3JtYXQ9anNvblwiXG4gIHJlc3RfcmVxdWVzdCA8LSBwYXN0ZTAodXJsLCBtZXRob2QsIFwiJlwiLCBwYXJhbWV0ZXIsXCImXCIsIGFwaV9rZXksIFwiJlwiLGZvcm1hdClcbiAgXG4gICMgRXhlY3V0aW5nIFJFU1QgcmVxdWVzdCBhbmQgZ2V0dGluZyBqb3NuIHRleHQgZGF0YVxuICBqc29uIDwtIEdFVCggcmVzdF9yZXF1ZXN0ICkgIywgdXNlX3Byb3h5KFwiMTcyLjE2LjE2LjYyXCIsIDgwODApKVx0IyBFeGVjdXRpbmcgcmVxdWVzdFxuICBqc29uX3RleHQgPC0gY29udGVudChqc29uLCBhcz1cInRleHRcIilcdFx0XHRcdCMgR2V0IEpTT04gdGV4dCBkYXRhXG4gIGxzX2FsYnVtcyA8LSBmcm9tSlNPTihqc29uX3RleHQpXHRcdFx0XHQjIGxvYWRpbmcgdGV4dCBkYXRhIGluIGEgbGlzdFxuXG4gIGRmX2FsYnVtcyA8LSBsc19hbGJ1bXMkdG9wYWxidW1zJGFsYnVtXG4gIGRmX2FsYnVtcyA8LSBjYmluZChhcnRpc3QgPSByZXAobmFtZV9hcnRpc3QsIG5yb3coZGZfYWxidW1zKSksXG4gICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGRmX2FsYnVtcyRuYW1lKSBcbiAgcmV0dXJuKGRmX2FsYnVtcylcbn1cblxuXG5gYGAifQ== -->
-<pre class="r"><code>library(httr)       # Library for scraping web data
-library(jsonlite)   # Library for reading JSON data
-
-get_artist_albums &lt;- function(name_artist){
-
-  name_artist &lt;- &quot;Neil Young&quot;
-  url &lt;- &quot;http://ws.audioscrobbler.com/2.0/?&quot;
-  method &lt;- &quot;method=artist.getTopAlbums&quot;
-  parameter &lt;- paste0(&quot;artist=&quot;, name_artist)
-  #no_artists &lt;- &quot;limit=100&quot;
-  api_key &lt;- &quot;api_key=bd357ecfcaa0085f4948c273729f44f4&quot;
-  format &lt;- &quot;format=json&quot;
-  rest_request &lt;- paste0(url, method, &quot;&amp;&quot;, parameter,&quot;&amp;&quot;, api_key, &quot;&amp;&quot;,format)
-  
-  # Executing REST request and getting josn text data
-  json &lt;- GET( rest_request ) #, use_proxy(&quot;172.16.16.62&quot;, 8080))   # Executing request
-  json_text &lt;- content(json, as=&quot;text&quot;)             # Get JSON text data
-  ls_albums &lt;- fromJSON(json_text)              # loading text data in a list
-
-  df_albums &lt;- ls_albums$topalbums$album
-  df_albums &lt;- cbind(artist = rep(name_artist, nrow(df_albums)),
-                     album = df_albums$name) 
-  return(df_albums)
-}
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfbHlyaWNfZG94IDwtIGRmX2x5cmljcyAlPiUgXG4gIGdyb3VwX2J5KGFydGlzdCwgYWxidW0sIHllYXJfYXBwZWFyYW5jZSwgdHJhY2tfdGl0bGUsIHRyYWNrX24pICU+JSBcbiAgc3VtbWFyaXNlKGx5cmljID0gcGFzdGUwKGx5cmljLCBjb2xsYXBzZSA9IFwiIFxcblwiKSkgJT4lIFxuICB1bmdyb3VwKCkgJT4lIFxuICBtdXRhdGUoZG9jX2lkID0gcm93X251bWJlcigpKSAlPiUgXG4gIGRwbHlyOjpzZWxlY3QoZG9jX2lkLCB0ZXh0ID0gbHlyaWMsIGV2ZXJ5dGhpbmcoKSlcbmxldmVsc19hcnRpc3RzIDwtIHVuaXF1ZShkZl9seXJpY19kb3gkYXJ0aXN0KVxuZGZfbHlyaWNfZG94JGFydGlzdCA8LSBmYWN0b3IoZGZfbHlyaWNfZG94JGFydGlzdCwgbGV2ZWxzID0gbGV2ZWxzX2FydGlzdHMpXG4jIENvbnZlcnQgZGZfc291cmNlIHRvIGEgY29ycHVzOiBkZl9jb3JwdXNcbmRmX3NvdXJjZSA8LSBEYXRhZnJhbWVTb3VyY2UoZGZfbHlyaWNfZG94KVxuY29ycHVzX2x5cmljcyA8LSBWQ29ycHVzKGRmX3NvdXJjZSlcbmNvcnB1c19seXJpY3MgJTw+JSBcbiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIoc3RyaXBXaGl0ZXNwYWNlKSkgJT4lIFxuICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcih0b2xvd2VyKSkgJT4lIFxuICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcihyZW1vdmVOdW1iZXJzKSkgJT4lIFxuICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcihyZW1vdmVQdW5jdHVhdGlvbikpICU+JSBcbiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBzdG9wd29yZHMoXCJlbmdsaXNoXCIpKSAlPiUgXG4gIHRtX21hcChyZW1vdmVXb3JkcywgYyhcIi1cIiwgXCIuLi5cIikpXG5gYGAifQ== -->
-<pre class="r"><code>df_lyric_dox &lt;- df_lyrics %&gt;% 
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDcmVhdGUgcm93IHBlciB0cmFjaywgY29tYmluaW5nIGx5cmljcyBpbiBvbmUgdGV4dCBmaWVsZFxuZGZfbHlyaWNfZG94IDwtIGRmX2x5cmljcyAlPiUgXG4gIGZpbHRlcighaXMubmEobHlyaWMpKSAlPiUgXG4gIGdyb3VwX2J5KGFydGlzdCwgYWxidW0sIHllYXJfYXBwZWFyYW5jZSwgdHJhY2tfdGl0bGUsIHRyYWNrX24pICU+JSBcbiAgc3VtbWFyaXNlKGx5cmljID0gcGFzdGUwKGx5cmljLCBjb2xsYXBzZSA9IFwiIFwiKSkgJT4lIFxuICB1bmdyb3VwKCkgJT4lIFxuICBtdXRhdGUoZG9jX2lkID0gcm93X251bWJlcigpKSAlPiUgXG4gIGRwbHlyOjpzZWxlY3QoZG9jX2lkLCB0ZXh0ID0gbHlyaWMsIGV2ZXJ5dGhpbmcoKSlcblxuIyBNYWtlIGZhY3RvciBvZiBhcnRpc3RzIGZvciBtb2RlbGxpbmdcbmxldmVsc19hcnRpc3RzIDwtIHVuaXF1ZShkZl9seXJpY19kb3gkYXJ0aXN0KVxuZGZfbHlyaWNfZG94JGFydGlzdCA8LSBmYWN0b3IoZGZfbHlyaWNfZG94JGFydGlzdCwgbGV2ZWxzID0gbGV2ZWxzX2FydGlzdHMpXG5cbiMgQ29udmVydCBkZl9zb3VyY2UgdG8gYSBjb3JwdXM6IGRmX2NvcnB1c1xuZGZfc291cmNlIDwtIFZlY3RvclNvdXJjZShkZl9seXJpY19kb3gkdGV4dClcbmNvcnB1c19seXJpY3MgPC0gQ29ycHVzKGRmX3NvdXJjZSlcblxuIyBDbGVhbiBjb3JwdXNcbmNvcnB1c19seXJpY3MgJTw+JSBcbiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBjKFwiLVwiLCBcIi4uLlwiLCBcIk5BXCIsIFwiY2hhcmFjdGVyXCIpKSAlPiUgXG4gIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHRvbG93ZXIpKSAlPiUgXG4gIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHJlbW92ZU51bWJlcnMpKSAlPiUgXG4gIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHJlbW92ZVB1bmN0dWF0aW9uKSkgJT4lIFxuICB0bV9tYXAocmVtb3ZlV29yZHMsIHN0b3B3b3JkcyhcImVuZ2xpc2hcIikpICU+JSBcbiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIoc3RyaXBXaGl0ZXNwYWNlKSlcblxuYGBgIn0= -->
+<pre class="r"><code># Create row per track, combining lyrics in one text field
+df_lyric_dox &lt;- df_lyrics %&gt;% 
+  filter(!is.na(lyric)) %&gt;% 
   group_by(artist, album, year_appearance, track_title, track_n) %&gt;% 
-  summarise(lyric = paste0(lyric, collapse = &quot; \n&quot;)) %&gt;% 
+  summarise(lyric = paste0(lyric, collapse = &quot; &quot;)) %&gt;% 
   ungroup() %&gt;% 
   mutate(doc_id = row_number()) %&gt;% 
   dplyr::select(doc_id, text = lyric, everything())
+
+# Make factor of artists for modelling
 levels_artists &lt;- unique(df_lyric_dox$artist)
 df_lyric_dox$artist &lt;- factor(df_lyric_dox$artist, levels = levels_artists)
+
 # Convert df_source to a corpus: df_corpus
-df_source &lt;- DataframeSource(df_lyric_dox)
-corpus_lyrics &lt;- VCorpus(df_source)
+df_source &lt;- VectorSource(df_lyric_dox$text)
+corpus_lyrics &lt;- Corpus(df_source)
+
+# Clean corpus
 corpus_lyrics %&lt;&gt;% 
-  tm_map(content_transformer(stripWhitespace)) %&gt;% 
+  tm_map(removeWords, c(&quot;-&quot;, &quot;...&quot;, &quot;NA&quot;, &quot;character&quot;)) %&gt;% 
   tm_map(content_transformer(tolower)) %&gt;% 
   tm_map(content_transformer(removeNumbers)) %&gt;% 
   tm_map(content_transformer(removePunctuation)) %&gt;% 
   tm_map(removeWords, stopwords(&quot;english&quot;)) %&gt;% 
-  tm_map(removeWords, c(&quot;-&quot;, &quot;...&quot;))</code></pre>
+  tm_map(content_transformer(stripWhitespace))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDcmVhdGUgZG9jdW1lbnQgdGVybSBhbmQgdGVybSBkb2N1bWVudCBtYXRyaWNlc1xuZHRtX2x5cmljcyA8LSBEb2N1bWVudFRlcm1NYXRyaXgoY29ycHVzX2x5cmljcylcbnRkbV9seXJpY3MgPC0gVGVybURvY3VtZW50TWF0cml4KGNvcnB1c19seXJpY3MpXG5gYGAifQ== -->
+<pre class="r"><code># Create document term and term document matrices
+dtm_lyrics &lt;- DocumentTermMatrix(corpus_lyrics)
+tdm_lyrics &lt;- TermDocumentMatrix(corpus_lyrics)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDb252ZXJ0IFRETSB0byBtYXRyaXhcbm1hdF9seXJpY3MgPC0gYXMubWF0cml4KHRkbV9seXJpY3MpXG4jIFN1bSByb3dzIGFuZCBmcmVxdWVuY3kgZGF0YSBmcmFtZVxubHlyaWNzX3Rlcm1fZnJlcSA8LSByb3dTdW1zKG1hdF9seXJpY3MpXG4jIFNvcnQgdGVybV9mcmVxdWVuY3kgaW4gZGVzY2VuZGluZyBvcmRlclxubHlyaWNzX3Rlcm1fZnJlcSA8LSBzb3J0KGx5cmljc190ZXJtX2ZyZXEsIGRlY3JlYXNpbmcgPSBUUlVFKVxuYmFycGxvdChseXJpY3NfdGVybV9mcmVxWzE6MjBdLCBjb2wgPSBcInN0ZWVsIGJsdWVcIiwgbGFzID0gMilcbmBgYCJ9 -->
+<pre class="r"><code># Convert TDM to matrix
+mat_lyrics &lt;- as.matrix(tdm_lyrics)
+# Sum rows and frequency data frame
+lyrics_term_freq &lt;- rowSums(mat_lyrics)
+# Sort term_frequency in descending order
+lyrics_term_freq &lt;- sort(lyrics_term_freq, decreasing = TRUE)
+barplot(lyrics_term_freq[1:20], col = &quot;steel blue&quot;, las = 2)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh3b3JkY2xvdWQpXG5seXJpY3Nfd29yZF9mcmVxIDwtIGRhdGEuZnJhbWUodGVybSA9IG5hbWVzKGx5cmljc190ZXJtX2ZyZXEpLFxuICBudW0gPSBseXJpY3NfdGVybV9mcmVxKVxuIyBDcmVhdGUgYSB3b3JkY2xvdWQgZm9yIHRoZSB2YWx1ZXMgaW4gd29yZF9mcmVxc1xud29yZGNsb3VkKGx5cmljc193b3JkX2ZyZXEkdGVybSwgbHlyaWNzX3dvcmRfZnJlcSRudW0sIG1heC53b3JkcyA9IDUwLCBjb2xvcnMgPSBcInJlZFwiKVxuYGBgIn0= -->
+<pre class="r"><code>library(wordcloud)
+lyrics_word_freq &lt;- data.frame(term = names(lyrics_term_freq),
+  num = lyrics_term_freq)
+# Create a wordcloud for the values in word_freqs
+wordcloud(lyrics_word_freq$term, lyrics_word_freq$num, max.words = 50, colors = &quot;red&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0LnNlZWQoNDIpXG5xdHlfdHJhaW4gPC0gcm91bmQobGVuZ3RoKGNvcnB1c19seXJpY3MpICogLjgsIDApXG5pZHhfdHJhaW4gPC0gc2FtcGxlKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpLCBxdHlfdHJhaW4pXG5pZHhfdGVzdCA8LSBjKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpKVshYygxOmxlbmd0aChjb3JwdXNfbHlyaWNzKSkgJWluJSBpZHhfdHJhaW5dXG5jb3JwdXNfdHJhaW4gPC0gY29ycHVzX2x5cmljc1tpZHhfdHJhaW5dXG5jb3JwdXNfdGVzdCA8LSBjb3JwdXNfbHlyaWNzW2lkeF90ZXN0XVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0LnNlZWQoNDIpXG5xdHlfdHJhaW4gPC0gcm91bmQobGVuZ3RoKGNvcnB1c19seXJpY3MpICogLjgsIDApXG5pZHhfdHJhaW4gPC0gc2FtcGxlKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpLCBxdHlfdHJhaW4pXG5pZHhfdGVzdCA8LSBjKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpKVshYygxOmxlbmd0aChjb3JwdXNfbHlyaWNzKSkgJWluJSBpZHhfdHJhaW5dXG5cbmNvcnB1c190cmFpbiA8LSBjb3JwdXNfbHlyaWNzW2lkeF90cmFpbl1cbmNvcnB1c190ZXN0IDwtIGNvcnB1c19seXJpY3NbaWR4X3Rlc3RdXG5gYGAifQ== -->
 <pre class="r"><code>set.seed(42)
 qty_train &lt;- round(length(corpus_lyrics) * .8, 0)
 idx_train &lt;- sample(1:length(corpus_lyrics), qty_train)
 idx_test &lt;- c(1:length(corpus_lyrics))[!c(1:length(corpus_lyrics)) %in% idx_train]
+
 corpus_train &lt;- corpus_lyrics[idx_train]
 corpus_test &lt;- corpus_lyrics[idx_test]</code></pre>
 <!-- rnb-source-end -->
@@ -391,14 +530,11 @@ df_test$corpus &lt;- df_lyric_dox$artist[idx_test]</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfcHJlZCA8LSBwcmVkaWN0KGZpdF9hcnRpc3RzLCBkZl90ZXN0LCB0eXBlID0gXCJwcm9iXCIpXG5cbmBgYCJ9 -->
-<pre class="r"><code>df_pred &lt;- predict(fit_artists, df_test, type = &quot;prob&quot;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0X21vZGVsIDwtIGtzdm0oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBrZXJuZWwgPSBcInJiZmRvdFwiKVxuZGZfcHJlZCA8LSBwcmVkaWN0KGZpdF9hcnRpc3RzLCBkZl90ZXN0LCB0eXBlID0gXCJwcm9iXCIpXG5cbmBgYCJ9 -->
+<pre class="r"><code>fit_model &lt;- ksvm(corpus ~ ., data = df_train, kernel = &quot;rbfdot&quot;)
+df_pred &lt;- predict(fit_artists, df_test, type = &quot;prob&quot;)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gcHJlZGljdC50cmFpbihmaXRfYXJ0aXN0cywgZGZfdGVzdCwgdHlwZSA9IFwicHJvYlwiKSA6IFxuICBvbmx5IGNsYXNzaWZpY2F0aW9uIG1vZGVscyB0aGF0IHByb2R1Y2UgcHJvYmFiaWxpdGllcyBhcmUgYWxsb3dlZFxuIn0= -->
-<pre><code>Error in predict.train(fit_artists, df_test, type = &quot;prob&quot;) : 
-  only classification models that produce probabilities are allowed</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0X2FydGlzdHMgPC0gdHJhaW4oY29ycHVzIH4gLiwgZGF0YSA9IGRmX3RyYWluLCBtZXRob2QgPSBcInN2bUxpbmVhcjNcIilcbmBgYCJ9 -->
@@ -408,13 +544,9 @@ df_test$corpus &lt;- df_lyric_dox$artist[idx_test]</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfcHJlZCA8LSBwcmVkaWN0KGZpdF9hcnRpc3RzLCBkZl90ZXN0LCB0eXBlID0gXCJwcm9iXCIpXG5gYGAifQ== -->
-<pre class="r"><code>df_pred &lt;- predict(fit_artists, df_test, type = &quot;prob&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfcHJlZCA8LSBwcmVkaWN0KGZpdF9hcnRpc3RzLCBkZl90ZXN0KSAjLCB0eXBlID0gXCJwcm9iXCIpXG5gYGAifQ== -->
+<pre class="r"><code>df_pred &lt;- predict(fit_artists, df_test) #, type = &quot;prob&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gcHJlZGljdC50cmFpbihmaXRfYXJ0aXN0cywgZGZfdGVzdCwgdHlwZSA9IFwicHJvYlwiKSA6IFxuICBvbmx5IGNsYXNzaWZpY2F0aW9uIG1vZGVscyB0aGF0IHByb2R1Y2UgcHJvYmFiaWxpdGllcyBhcmUgYWxsb3dlZFxuIn0= -->
-<pre><code>Error in predict.train(fit_artists, df_test, type = &quot;prob&quot;) : 
-  only classification models that produce probabilities are allowed</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -423,38 +555,14 @@ df_test$corpus &lt;- df_lyric_dox$artist[idx_test]</code></pre>
 <pre class="r"><code>matrix_confusion &lt;- confusionMatrix(df_pred, df_test$corpus)
 matrix_confusion</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiQ29uZnVzaW9uIE1hdHJpeCBhbmQgU3RhdGlzdGljc1xuXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBSZWZlcmVuY2VcblByZWRpY3Rpb24gICAgICAgICAgICAgICAgICBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIFRpbmRlcnN0aWNrcyBUb20gV2FpdHNcbiAgTmljayBDYXZlICYgVGhlIEJhZCBTZWVkcyAgICAgICAgICAgICAgICAgICAgICAgIDE2ICAgICAgICAgICAgMyAgICAgICAgIDVcbiAgVGluZGVyc3RpY2tzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA2ICAgICAgICAgICAxNCAgICAgICAgIDNcbiAgVG9tIFdhaXRzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA4ICAgICAgICAgICAxMCAgICAgICAgMzNcblxuT3ZlcmFsbCBTdGF0aXN0aWNzXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgIEFjY3VyYWN5IDogMC42NDI5ICAgICAgICAgIFxuICAgICAgICAgICAgICAgICA5NSUgQ0kgOiAoMC41Mzk3LCAwLjczNzEpXG4gICAgTm8gSW5mb3JtYXRpb24gUmF0ZSA6IDAuNDE4NCAgICAgICAgICBcbiAgICBQLVZhbHVlIFtBY2MgPiBOSVJdIDogNi4yMThlLTA2ICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICBLYXBwYSA6IDAuNDQ0MyAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIE1jbmVtYXIncyBUZXN0IFAtVmFsdWUgOiAwLjE0MSAgICAgICAgICAgXG5cblN0YXRpc3RpY3MgYnkgQ2xhc3M6XG5cbiAgICAgICAgICAgICAgICAgICAgIENsYXNzOiBOaWNrIENhdmUgJiBUaGUgQmFkIFNlZWRzIENsYXNzOiBUaW5kZXJzdGlja3MgQ2xhc3M6IFRvbSBXYWl0c1xuU2Vuc2l0aXZpdHkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjUzMzMgICAgICAgICAgICAgIDAuNTE4NSAgICAgICAgICAgMC44MDQ5XG5TcGVjaWZpY2l0eSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuODgyNCAgICAgICAgICAgICAgMC44NzMyICAgICAgICAgICAwLjY4NDJcblBvcyBQcmVkIFZhbHVlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC42NjY3ICAgICAgICAgICAgICAwLjYwODcgICAgICAgICAgIDAuNjQ3MVxuTmVnIFByZWQgVmFsdWUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjgxMDggICAgICAgICAgICAgIDAuODI2NyAgICAgICAgICAgMC44Mjk4XG5QcmV2YWxlbmNlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMzA2MSAgICAgICAgICAgICAgMC4yNzU1ICAgICAgICAgICAwLjQxODRcbkRldGVjdGlvbiBSYXRlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4xNjMzICAgICAgICAgICAgICAwLjE0MjkgICAgICAgICAgIDAuMzM2N1xuRGV0ZWN0aW9uIFByZXZhbGVuY2UgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjI0NDkgICAgICAgICAgICAgIDAuMjM0NyAgICAgICAgICAgMC41MjA0XG5CYWxhbmNlZCBBY2N1cmFjeSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuNzA3OCAgICAgICAgICAgICAgMC42OTU5ICAgICAgICAgICAwLjc0NDVcbiJ9 -->
-<pre><code>Confusion Matrix and Statistics
-
-                           Reference
-Prediction                  Nick Cave &amp; The Bad Seeds Tindersticks Tom Waits
-  Nick Cave &amp; The Bad Seeds                        16            3         5
-  Tindersticks                                      6           14         3
-  Tom Waits                                         8           10        33
-
-Overall Statistics
-                                          
-               Accuracy : 0.6429          
-                 95% CI : (0.5397, 0.7371)
-    No Information Rate : 0.4184          
-    P-Value [Acc &gt; NIR] : 6.218e-06       
-                                          
-                  Kappa : 0.4443          
-                                          
- Mcnemar's Test P-Value : 0.141           
-
-Statistics by Class:
-
-                     Class: Nick Cave &amp; The Bad Seeds Class: Tindersticks Class: Tom Waits
-Sensitivity                                    0.5333              0.5185           0.8049
-Specificity                                    0.8824              0.8732           0.6842
-Pos Pred Value                                 0.6667              0.6087           0.6471
-Neg Pred Value                                 0.8108              0.8267           0.8298
-Prevalence                                     0.3061              0.2755           0.4184
-Detection Rate                                 0.1633              0.1429           0.3367
-Detection Prevalence                           0.2449              0.2347           0.5204
-Balanced Accuracy                              0.7078              0.6959           0.7445</code></pre>
-<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfYWNjdXJhY3kgPC0gY2JpbmQoZGZfbHlyaWNfZG94W2lkeF90ZXN0LCBdLCBwcmVkaWN0aW9uID0gZGZfcHJlZClcbmRmX2FjY3VyYWN5JGFjY3VyYWN5IDwtIGlmX2Vsc2UoZGZfYWNjdXJhY3kkcHJlZGljdGlvbiA9PSBkZl9hY2N1cmFjeSRhcnRpc3QsIDEsIDApXG5gYGAifQ== -->
+<pre class="r"><code>df_accuracy &lt;- cbind(df_lyric_dox[idx_test, ], prediction = df_pred)
+df_accuracy$accuracy &lt;- if_else(df_accuracy$prediction == df_accuracy$artist, 1, 0)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwZXJmb3JtYW5jZUVzdGltYXRpb24pXG5jbGFzc2lmaWNhdGlvbk1ldHJpY3MoZGZfYWNjdXJhY3kkYXJ0aXN0LCBkZl9hY2N1cmFjeSRwcmVkaWN0aW9uKVxuYGBgIn0= -->
@@ -462,22 +570,8 @@ Balanced Accuracy                              0.7078              0.6959       
 classificationMetrics(df_accuracy$artist, df_accuracy$prediction)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2xhc3NpZmljYXRpb25NZXRyaWNzKGRmX2FjY3VyYWN5JGFydGlzdCwgZGZfYWNjdXJhY3kkcHJlZGljdGlvbilcblxuYGBgIn0= -->
-<pre class="r"><code>classificationMetrics(df_accuracy$artist, df_accuracy$prediction)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgYWNjICAgICAgIGVyciAgICBtaWNyb0YgICAgbWFjcm9GICBtYWNyb1JlYyBtYWNyb1ByZWMgXG4wLjY0Mjg1NzEgMC4zNTcxNDI5IDAuNjQyODU3MSAwLjYyMzMyODAgMC42MTg5MTAwIDAuNjQwODA3MCBcbiJ9 -->
-<pre><code>      acc       err    microF    macroF  macroRec macroPrec 
-0.6428571 0.3571429 0.6428571 0.6233280 0.6189100 0.6408070 </code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTWluaW5nIEx5cmljcyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCgpgYGB7cn0KbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkobWFncml0dHIpCmxpYnJhcnkoZ2VuaXVzKQpsaWJyYXJ5KGtlcm5sYWIpIApsaWJyYXJ5KGNhcmV0KSAKbGlicmFyeSh0bSkgCmxpYnJhcnkoc3BsaXRzdGFja3NoYXBlKQpsaWJyYXJ5KGUxMDcxKQpgYGAKYGBge3IgTG9hZGluZyBkYXRhfQpkaXJfaW5wdXQgPC0gcGFzdGUwKGdldHdkKCksICAiL0lucHV0LyIpCmZpbGVfbHlyaWNzIDwtIHBhc3RlMChkaXJfaW5wdXQsICJkZl9seXJpY3MuUkRTIikKCiMgUmVhZCBhbGJ1bXMgYW5kIHByZS1wcm9jZXNzZWQgbHlyaWNzCiMgZGZfYWxidW1zIDwtIHJlYWRfY3N2MigiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21hcmstbWUvbHlyaWNfbWluaW5nL21hc3Rlci9hcnRpc3RzX2FsYnVtcy5jc3YiKQpkZl9hbGJ1bXMgPC0gcmVhZF9jc3YyKCJhcnRpc3RzX2FsYnVtcy5jc3YiKQppZihmaWxlLmV4aXN0cyhmaWxlX2x5cmljcykpewogIGRmX2x5cmljcyA8LSByZWFkX3JkcyhmaWxlX2x5cmljcykgCn0gZWxzZSB7CiAgZGZfbHlyaWNzIDwtIHRpYmJsZShhcnRpc3QgPSBjaGFyYWN0ZXIoMCksCiAgICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGNoYXJhY3RlcigwKSkKfQoKIyBTZWUgd2hldGhlciBuZXcgYWxidW1uIGx5cmljcyBzaG91bGQgYmUgcmV0cmlldmVkCmRmX2x5cmljc19uZXcgPC0gZGZfYWxidW1zICU+JSAKICBhbnRpX2pvaW4oZGZfbHlyaWNzLCBieSA9IGMoImFydGlzdCIsICJhbGJ1bSIpKSAlPiUgCiAgYWRkX2dlbml1cyhhcnRpc3QsIGFsYnVtKQoKIyBBZGQgbmV3IGFsYnVtIGx5cmljcwppZihucm93KGRmX2x5cmljc19uZXcpID4gMCl7CiAgZGZfbHlyaWNzIDwtIHJiaW5kKGRmX2x5cmljcywgZGZfbHlyaWNzX25ldykKfSBlbHNlIGlmKG5yb3coZGZfbHlyaWNzKSA9PSAwKXsKICBkZl9seXJpY3MgPC0gZGZfbHlyaWNzX25ldwp9Cgp3cml0ZV9yZHMoZGZfbHlyaWNzLCBmaWxlX2x5cmljcywgY29tcHJlc3MgPSAiZ3oiKQpgYGAKCmBgYHtyfQpsaWJyYXJ5KGh0dHIpCQkjIExpYnJhcnkgZm9yIHNjcmFwaW5nIHdlYiBkYXRhCmxpYnJhcnkoanNvbmxpdGUpCSMgTGlicmFyeSBmb3IgcmVhZGluZyBKU09OIGRhdGEKCmdldF9hcnRpc3RfYWxidW1zIDwtIGZ1bmN0aW9uKG5hbWVfYXJ0aXN0KXsKCiAgbmFtZV9hcnRpc3QgPC0gIk5laWwgWW91bmciCiAgdXJsIDwtICJodHRwOi8vd3MuYXVkaW9zY3JvYmJsZXIuY29tLzIuMC8/IgogIG1ldGhvZCA8LSAibWV0aG9kPWFydGlzdC5nZXRUb3BBbGJ1bXMiCiAgcGFyYW1ldGVyIDwtIHBhc3RlMCgiYXJ0aXN0PSIsIG5hbWVfYXJ0aXN0KQogICNub19hcnRpc3RzIDwtICJsaW1pdD0xMDAiCiAgYXBpX2tleSA8LSAiYXBpX2tleT1iZDM1N2VjZmNhYTAwODVmNDk0OGMyNzM3MjlmNDRmNCIKICBmb3JtYXQgPC0gImZvcm1hdD1qc29uIgogIHJlc3RfcmVxdWVzdCA8LSBwYXN0ZTAodXJsLCBtZXRob2QsICImIiwgcGFyYW1ldGVyLCImIiwgYXBpX2tleSwgIiYiLGZvcm1hdCkKICAKICAjIEV4ZWN1dGluZyBSRVNUIHJlcXVlc3QgYW5kIGdldHRpbmcgam9zbiB0ZXh0IGRhdGEKICBqc29uIDwtIEdFVCggcmVzdF9yZXF1ZXN0ICkgIywgdXNlX3Byb3h5KCIxNzIuMTYuMTYuNjIiLCA4MDgwKSkJIyBFeGVjdXRpbmcgcmVxdWVzdAogIGpzb25fdGV4dCA8LSBjb250ZW50KGpzb24sIGFzPSJ0ZXh0IikJCQkJIyBHZXQgSlNPTiB0ZXh0IGRhdGEKICBsc19hbGJ1bXMgPC0gZnJvbUpTT04oanNvbl90ZXh0KQkJCQkjIGxvYWRpbmcgdGV4dCBkYXRhIGluIGEgbGlzdAoKICBkZl9hbGJ1bXMgPC0gbHNfYWxidW1zJHRvcGFsYnVtcyRhbGJ1bQogIGRmX2FsYnVtcyA8LSBjYmluZChhcnRpc3QgPSByZXAobmFtZV9hcnRpc3QsIG5yb3coZGZfYWxidW1zKSksCiAgICAgICAgICAgICAgICAgICAgIGFsYnVtID0gZGZfYWxidW1zJG5hbWUpIAogIHJldHVybihkZl9hbGJ1bXMpCn0KCgpgYGAKCmBgYHtyfQpkZl9seXJpY19kb3ggPC0gZGZfbHlyaWNzICU+JSAKICBncm91cF9ieShhcnRpc3QsIGFsYnVtLCB5ZWFyX2FwcGVhcmFuY2UsIHRyYWNrX3RpdGxlLCB0cmFja19uKSAlPiUgCiAgc3VtbWFyaXNlKGx5cmljID0gcGFzdGUwKGx5cmljLCBjb2xsYXBzZSA9ICIgXG4iKSkgJT4lIAogIHVuZ3JvdXAoKSAlPiUgCiAgbXV0YXRlKGRvY19pZCA9IHJvd19udW1iZXIoKSkgJT4lIAogIGRwbHlyOjpzZWxlY3QoZG9jX2lkLCB0ZXh0ID0gbHlyaWMsIGV2ZXJ5dGhpbmcoKSkKCmxldmVsc19hcnRpc3RzIDwtIHVuaXF1ZShkZl9seXJpY19kb3gkYXJ0aXN0KQoKZGZfbHlyaWNfZG94JGFydGlzdCA8LSBmYWN0b3IoZGZfbHlyaWNfZG94JGFydGlzdCwgbGV2ZWxzID0gbGV2ZWxzX2FydGlzdHMpCgojIENvbnZlcnQgZGZfc291cmNlIHRvIGEgY29ycHVzOiBkZl9jb3JwdXMKZGZfc291cmNlIDwtIERhdGFmcmFtZVNvdXJjZShkZl9seXJpY19kb3gpCmNvcnB1c19seXJpY3MgPC0gVkNvcnB1cyhkZl9zb3VyY2UpCgpjb3JwdXNfbHlyaWNzICU8PiUgCiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIoc3RyaXBXaGl0ZXNwYWNlKSkgJT4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHRvbG93ZXIpKSAlPiUgCiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIocmVtb3ZlTnVtYmVycykpICU+JSAKICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcihyZW1vdmVQdW5jdHVhdGlvbikpICU+JSAKICB0bV9tYXAocmVtb3ZlV29yZHMsIHN0b3B3b3JkcygiZW5nbGlzaCIpKSAlPiUgCiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBjKCItIiwgIi4uLiIpKQpgYGAKCmBgYHtyIFNldHRpbmcgdXAgdHJhaW5pbmcgYW5kIHRlc3Qgc2V0fQpzZXQuc2VlZCg0MikKcXR5X3RyYWluIDwtIHJvdW5kKGxlbmd0aChjb3JwdXNfbHlyaWNzKSAqIC44LCAwKQppZHhfdHJhaW4gPC0gc2FtcGxlKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpLCBxdHlfdHJhaW4pCmlkeF90ZXN0IDwtIGMoMTpsZW5ndGgoY29ycHVzX2x5cmljcykpWyFjKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpKSAlaW4lIGlkeF90cmFpbl0KCmNvcnB1c190cmFpbiA8LSBjb3JwdXNfbHlyaWNzW2lkeF90cmFpbl0KY29ycHVzX3Rlc3QgPC0gY29ycHVzX2x5cmljc1tpZHhfdGVzdF0KYGBgCgpgYGB7ciBDcmVhdGluZyBkb2N1bWVudCB0ZXJtIG1hdHJpY2VzfQpkdG1fdHJhaW4gPC0gYXMubWF0cml4KERvY3VtZW50VGVybU1hdHJpeChjb3JwdXNfdHJhaW4sIGNvbnRyb2w9bGlzdCh3b3JkTGVuZ3Rocz1jKDEsSW5mKSkpKQpkdG1fdGVzdCA8LSBhcy5tYXRyaXgoRG9jdW1lbnRUZXJtTWF0cml4KGNvcnB1c190ZXN0LCBjb250cm9sPWxpc3Qod29yZExlbmd0aHM9YygxLEluZikpKSkKYGBgCgpgYGB7ciBDb25mb3JtaW5nIERUTXN9CmRmX3RyYWluIDwtIGRhdGEuZnJhbWUoZHRtX3RyYWluWyxpbnRlcnNlY3QoY29sbmFtZXMoZHRtX3RyYWluKSwgY29sbmFtZXMoZHRtX3Rlc3QpKV0pCmRmX3Rlc3QgPC0gZGF0YS5mcmFtZShkdG1fdGVzdFssaW50ZXJzZWN0KGNvbG5hbWVzKGR0bV90ZXN0KSwgY29sbmFtZXMoZHRtX3RyYWluKSldKQpgYGAKCmBgYHtyfQpkZl90cmFpbiRjb3JwdXMgPC0gZGZfbHlyaWNfZG94JGFydGlzdFtpZHhfdHJhaW5dCmRmX3Rlc3QkY29ycHVzIDwtIGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3Rlc3RdCmBgYAoKYGBge3IgQ3JlYXRlIG1vZGVsfQpmaXRfbW9kZWwgPC0ga3N2bShjb3JwdXMgfiAuLCBkYXRhID0gZGZfdHJhaW4sIGtlcm5lbCA9ICJyYmZkb3QiKQpkZl9wcmVkIDwtIHByZWRpY3QoZml0X2FydGlzdHMsIGRmX3Rlc3QsIHR5cGUgPSAicHJvYiIpCgpgYGAKYGBge3J9CmZpdF9hcnRpc3RzIDwtIHRyYWluKGNvcnB1cyB+IC4sIGRhdGEgPSBkZl90cmFpbiwgbWV0aG9kID0gInN2bUxpbmVhcjMiKQpgYGAKCmBgYHtyIFByZWRpY3R9CmRmX3ByZWQgPC0gcHJlZGljdChmaXRfYXJ0aXN0cywgZGZfdGVzdCkgIywgdHlwZSA9ICJwcm9iIikKYGBgCgpgYGB7cn0KbWF0cml4X2NvbmZ1c2lvbiA8LSBjb25mdXNpb25NYXRyaXgoZGZfcHJlZCwgZGZfdGVzdCRjb3JwdXMpCm1hdHJpeF9jb25mdXNpb24KYGBgCmBgYHtyfQpsaWJyYXJ5KHBlcmZvcm1hbmNlRXN0aW1hdGlvbikKY2xhc3NpZmljYXRpb25NZXRyaWNzKGRmX2FjY3VyYWN5JGFydGlzdCwgZGZfYWNjdXJhY3kkcHJlZGljdGlvbikKYGBgCgpgYGB7cn0KZGZfYWNjdXJhY3kgPC0gY2JpbmQoZGZfbHlyaWNfZG94W2lkeF90ZXN0LCBdLAogICAgICAgICAgICAgICAgICAgICBwcmVkaWN0aW9uID0gZGZfcHJlZCkKZGZfYWNjdXJhY3kkYWNjdXJhY3kgPC0gaWZfZWxzZShkZl9hY2N1cmFjeSRwcmVkaWN0aW9uID09IGRmX2FjY3VyYWN5JGFydGlzdCwgMSwgMCkKYGBgCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTWluaW5nIEx5cmljcyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KG1hZ3JpdHRyKQpsaWJyYXJ5KGdlbml1cykKbGlicmFyeShrZXJubGFiKSAKbGlicmFyeShjYXJldCkgCmxpYnJhcnkodG0pIApsaWJyYXJ5KHNwbGl0c3RhY2tzaGFwZSkKbGlicmFyeShlMTA3MSkKbGlicmFyeShodHRyKQkJIyBMaWJyYXJ5IGZvciBzY3JhcGluZyB3ZWIgZGF0YQpsaWJyYXJ5KGpzb25saXRlKQkjIExpYnJhcnkgZm9yIHJlYWRpbmcgSlNPTiBkYXRhCmBgYApgYGB7ciBGdW5jdGlvbnMgZm9yIHNjcmFwaW5nIGRhdGF9CiMgUmV0cmlldmluZyBhbiBhcnRpc3QncyBNdXNpY0JyYWlueiBJRCBmcm9tIGxhc3QuZm0KZ2V0X2FydGlzdF9tYmlkIDwtIGZ1bmN0aW9uKG5hbWVfYXJ0aXN0KXsKCiAgdXJsIDwtICJodHRwOi8vd3MuYXVkaW9zY3JvYmJsZXIuY29tLzIuMC8/IgogIG1ldGhvZCA8LSAibWV0aG9kPWFydGlzdC5nZXRJbmZvIgogIHBhcmFtZXRlciA8LSBwYXN0ZTAoImFydGlzdD0iLCBuYW1lX2FydGlzdCkKICBhcGlfa2V5IDwtICJhcGlfa2V5PWJkMzU3ZWNmY2FhMDA4NWY0OTQ4YzI3MzcyOWY0NGY0IgogIGZvcm1hdCA8LSAiZm9ybWF0PWpzb24iCiAgcXR5X2FsYnVtcyA8LSAibGltaXQ9MSIKICByZXN0X3JlcXVlc3QgPC0gcGFzdGUwKHVybCwgcGFzdGUobWV0aG9kLCBwYXJhbWV0ZXIsIGFwaV9rZXksIGZvcm1hdCwgc2VwID0gIiYiKSkKICAKICBqc29uIDwtIEdFVCggcmVzdF9yZXF1ZXN0ICkgIywgdXNlX3Byb3h5KCIxNzIuMTYuMTYuNjIiLCA4MDgwKSkJIyBFeGVjdXRpbmcgcmVxdWVzdAogIGpzb25fdGV4dCA8LSBjb250ZW50KGpzb24sIGFzPSJ0ZXh0IiwgZW5jb2RpbmcgPSAiVVRGLTgiKQkJCQkjIEdldCBKU09OIHRleHQgZGF0YQogIGxzX2FydGlzdCA8LSBmcm9tSlNPTihqc29uX3RleHQpCQkJCSMgbG9hZGluZyB0ZXh0IGRhdGEgaW4gYSBsaXN0CgogIHJldHVybihsc19hcnRpc3RbMV0kYXJ0aXN0JG1iaWQpCn0KYGBgIApgYGB7cn0KIyBSZXRyaWV2aW5nIGFuIGFydGlzdCdzIHN0dWRpbyBhbGJ1bXMgZnJvbSBNdXNpY0JyYWluegpnZXRfYXJ0aXN0X3N0dWRpb19hbGJ1bXMgPC0gZnVuY3Rpb24oYXJ0aXN0X21iaWQpewogIAogIHVybCA8LSAiaHR0cDovL211c2ljYnJhaW56Lm9yZy93cy8yL2FydGlzdC8iCiAgZmlsdGVyIDwtICI/aW5jPXJlbGVhc2UtZ3JvdXBzIgogIGZvcm1hdCA8LSAiZm9ybWF0PWpzb24iCiAgcmVzdF9yZXF1ZXN0IDwtIHBhc3RlMCh1cmwsIGFydGlzdF9tYmlkLCBmaWx0ZXIsICImIiwgZm9ybWF0KQogIAogIGpzb24gPC0gR0VUKCByZXN0X3JlcXVlc3QgKSAjICwgdXNlX3Byb3h5KCIxNzIuMTYuMTYuNjIiLCA4MDgwKSkJIyBFeGVjdXRpbmcgcmVxdWVzdAogIGpzb25fdGV4dCA8LSBjb250ZW50KGpzb24sIGFzPSJ0ZXh0IiwgZW5jb2RpbmcgPSAiVVRGLTgiKQkJCQkjIEdldCBKU09OIHRleHQgZGF0YQogIGxzX2FsYnVtcyA8LSBmcm9tSlNPTihqc29uX3RleHQpCQkJCSMgbG9hZGluZyB0ZXh0IGRhdGEgaW4gYSBsaXN0CiAgCiAgbHNfYWxidW1fdHlwZXMgPC0gbHNfYWxidW1zJGByZWxlYXNlLWdyb3Vwc2AkYHNlY29uZGFyeS10eXBlc2AKICBsc19hbGJ1bV90eXBlcyA8LSBsYXBwbHkobHNfYWxidW1fdHlwZXMsIGZ1bmN0aW9uKHgpIGlmZWxzZShpcy5udWxsKHgpLCBOQSwgeCkpCiAgCiAgZGZfYWxidW1zIDwtIHRpYmJsZShhcnRpc3QgPSByZXAobHNfYWxidW1zJGBzb3J0LW5hbWVgLCBucm93KGxzX2FsYnVtcyRgcmVsZWFzZS1ncm91cHNgKSksCiAgICAgICAgICAgICAgICAgICAgICBhbGJ1bSA9IGxzX2FsYnVtcyRgcmVsZWFzZS1ncm91cHNgJHRpdGxlLAogICAgICAgICAgICAgICAgICAgICAgZGF0ZV9hcHBlYXJhbmNlID0gbHNfYWxidW1zJGByZWxlYXNlLWdyb3Vwc2AkYGZpcnN0LXJlbGVhc2UtZGF0ZWAsCiAgICAgICAgICAgICAgICAgICAgICBhbGJ1bV90eXBlID0gdW5saXN0KGxzX2FsYnVtX3R5cGVzKSkKICAKICBkZl9hbGJ1bXMgJTw+JQogICAgZmlsdGVyKGlzLm5hKGFsYnVtX3R5cGUpKSAlPiUgCiAgICBtdXRhdGUoeWVhcl9yZWxlYXNlID0gc3RyX3N1YihkYXRlX2FwcGVhcmFuY2UsIDEsIDQpKSAlPiUgCiAgICBzZWxlY3QoYXJ0aXN0LCBhbGJ1bSwgeWVhcl9yZWxlYXNlKQogIHJvdy5uYW1lcyhkZl9hbGJ1bXMpIDwtIE5VTEwKICAKICByZXR1cm4oZGZfYWxidW1zKQp9CmBgYCAKYGBge3J9CiMgUmV0cmlldmluZyBhbiBhcnRpc3QncyBzdHVkaW8gYWxidW1zIGZyb20gbGFzdC5mbQpnZXRfYXJ0aXN0X2FsYnVtcyA8LSBmdW5jdGlvbihuYW1lX2FydGlzdCl7CgogIHVybCA8LSAiaHR0cDovL3dzLmF1ZGlvc2Nyb2JibGVyLmNvbS8yLjAvPyIKICBtZXRob2QgPC0gIm1ldGhvZD1hcnRpc3QuZ2V0VG9wQWxidW1zIgogIHBhcmFtZXRlciA8LSBwYXN0ZTAoImFydGlzdD0iLCBuYW1lX2FydGlzdCkKICBhcGlfa2V5IDwtICJhcGlfa2V5PWJkMzU3ZWNmY2FhMDA4NWY0OTQ4YzI3MzcyOWY0NGY0IgogIGZvcm1hdCA8LSAiZm9ybWF0PWpzb24iCiAgcXR5X2FsYnVtcyA8LSAibGltaXQ9MTUwIgogIHJlc3RfcmVxdWVzdCA8LSBwYXN0ZTAodXJsLCBwYXN0ZShtZXRob2QsIHBhcmFtZXRlciwgYXBpX2tleSwgZm9ybWF0LCBkZWxpbWl0ZXIgPSAiJiIpKQogIAogICMgRXhlY3V0aW5nIFJFU1QgcmVxdWVzdCBhbmQgZ2V0dGluZyBqb3NuIHRleHQgZGF0YQogIGpzb24gPC0gR0VUKCByZXN0X3JlcXVlc3QgKSAjLCB1c2VfcHJveHkoIjE3Mi4xNi4xNi42MiIsIDgwODApKQkjIEV4ZWN1dGluZyByZXF1ZXN0CiAganNvbl90ZXh0IDwtIGNvbnRlbnQoanNvbiwgYXMgPSAidGV4dCIpCQkJCSMgR2V0IEpTT04gdGV4dCBkYXRhCiAgbHNfYWxidW1zIDwtIGZyb21KU09OKGpzb25fdGV4dCkJCQkJIyBsb2FkaW5nIHRleHQgZGF0YSBpbiBhIGxpc3QKCiAgZGZfYWxidW1zIDwtIGxzX2FsYnVtcyR0b3BhbGJ1bXMkYWxidW0KICBkZl9hbGJ1bXMgPC0gYXMudGliYmxlKGNiaW5kKGFydGlzdCA9IHJlcChuYW1lX2FydGlzdCwgbnJvdyhkZl9hbGJ1bXMpKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFsYnVtID0gZGZfYWxidW1zJG5hbWUpKQogIHJldHVybihkZl9hbGJ1bXMpCn0KCmBgYAoKYGBge3J9CnZlY19hcnRpc3RzIDwtIGMoIlRpbmRlcnN0aWNrcyIsICJUb20gV2FpdHMiLCAiTmljayBDYXZlIGFuZCBUaGUgQmFkIFNlZWRzIiwgIlZhbmlsbGEgSWNlIiwgIlRoZSBOYXRpb25hbCIsICJNZXRhbGxpY2EiKQoKZGZfYXJ0aXN0cyA8LSB0aWJibGUoYXJ0aXN0ID0gdmVjX2FydGlzdHMsCiAgICAgICAgICAgICAgICAgICAgIGFydGlzdF9tYmlkID0gc2FwcGx5KHZlY19hcnRpc3RzLCBnZXRfYXJ0aXN0X21iaWQpKQpybSh2ZWNfYXJ0aXN0cykKYGBgCmBgYHtyfQpmaWxlX2FsYnVtcyA8LSAiYXJ0aXN0c19hbGJ1bXMuY3N2IgoKaWYoZmlsZS5leGlzdHMoZmlsZV9hbGJ1bXMpKXsKICBkZl9hbGJ1bXMgPC0gcmVhZF9jc3YyKGZpbGVfYWxidW1zKQp9IGVsc2UgewogIGRmX2FsYnVtcyA8LSB0aWJibGUoYXJ0aXN0ID0gY2hhcmFjdGVyKDApLAogICAgICAgICAgICAgICAgICAgICAgYWxidW0gPSBjaGFyYWN0ZXIoMCksCiAgICAgICAgICAgICAgICAgICAgICB5ZWFyX3JlbGVhc2UgPSBjaGFyYWN0ZXIoMCkpCn0KCmFydGlzdHNfc2VhcmNoIDwtIGRmX2FydGlzdHMkYXJ0aXN0X21iaWRbIWRmX2FydGlzdHMgJWluJSBkZl9hbGJ1bXMkYXJ0aXN0XQpgYGAKYGBge3J9CmZvcihhcnRpc3RfbWJpZCBpbiBhcnRpc3RzX3NlYXJjaCl7CgogIGRmX2FydGlzdF9hbGJ1bXMgPC0gdGliYmxlKGFydGlzdCA9IGNoYXJhY3RlcigwKSwgYWxidW0gPSBjaGFyYWN0ZXIoMCksIHllYXJfcmVsZWFzZSA9IGNoYXJhY3RlcigwKSkKICAKICBhdHRlbXB0IDwtIDAKICB3aGlsZSggKG5yb3coZGZfYXJ0aXN0X2FsYnVtcykgPT0gMCB8IGlzLm51bGwoZGZfYXJ0aXN0X2FsYnVtcykpCiAgICAgICAgICYmIGF0dGVtcHQgPD0gOTkgKSB7CiAgICBhdHRlbXB0IDwtIGF0dGVtcHQgKyAxCiAgICB0cnkoCiAgICAgIGRmX2FydGlzdF9hbGJ1bXMgPC0gZ2V0X2FydGlzdF9zdHVkaW9fYWxidW1zKGFydGlzdF9tYmlkKQogICAgKQogICAgIyBTeXMuc2xlZXAoMSkKICB9CiAgCiAgaWYobnJvdyhkZl9hcnRpc3RfYWxidW1zKSA+IDApIHsKICAgICMgUmVuYW1lIGFydGlzdCBiYWNrIHRvIG9yaWdpbmFsIGZvcm0KICAgIG5hbWVfYXJ0aXN0IDwtIGRmX2FydGlzdHMkYXJ0aXN0W2RmX2FydGlzdHMkYXJ0aXN0X21iaWQgPT0gYXJ0aXN0X21iaWRdCiAgICBkZl9hcnRpc3RfYWxidW1zICU8PiUKICAgICAgbXV0YXRlKGFydGlzdCA9IG5hbWVfYXJ0aXN0KQogIAogICAgZGZfYWxidW1zIDwtIHJiaW5kKGRmX2FsYnVtcywgZGZfYXJ0aXN0X2FsYnVtcykgIAogIAogICAgcHJpbnQocGFzdGUwKCJBZGRlZCAiLCBuYW1lX2FydGlzdCwgIiAtICIsIG5yb3coZGZfYXJ0aXN0X2FsYnVtcyksICIgYWxidW1zIikpCiAgfQogICAgCn0Kcm0oZGZfYXJ0aXN0X2FsYnVtcykKd3JpdGVfY3N2MihkZl9hbGJ1bXMsICJhcnRpc3RzX2FsYnVtcy5jc3YiKQpgYGAKCmBgYHtyIExvYWRpbmcgZGF0YX0KIyBSZWFkIGFsYnVtcyBhbmQgcHJlLXByb2Nlc3NlZCBseXJpY3MKZmlsZV9seXJpY3MgPC0gImRmX2x5cmljcy5SRFMiCmlmKGZpbGUuZXhpc3RzKGZpbGVfbHlyaWNzKSl7CiAgZGZfbHlyaWNzIDwtIHJlYWRfcmRzKGZpbGVfbHlyaWNzKSAKfSBlbHNlIHsKICBkZl9seXJpY3MgPC0gdGliYmxlKGFydGlzdCA9IGNoYXJhY3RlcigwKSwgYWxidW0gPSBjaGFyYWN0ZXIoMCkpCn0KCiMgU2VlIHdoZXRoZXIgbmV3IGFsYnVtbiBseXJpY3Mgc2hvdWxkIGJlIHJldHJpZXZlZApkZl9seXJpY3NfbmV3IDwtIGRmX2FsYnVtcyAlPiUgCiAgYW50aV9qb2luKGRmX2x5cmljcywgYnkgPSBjKCJhcnRpc3QiLCAiYWxidW0iKSkgJT4lIAogIGFkZF9nZW5pdXMoYXJ0aXN0LCBhbGJ1bSkKCiMgQWRkIG5ldyBhbGJ1bSBseXJpY3MKaWYobnJvdyhkZl9seXJpY3MpICE9IDApewogIGRmX2x5cmljcyA8LSByYmluZChkZl9seXJpY3MsIGRmX2x5cmljc19uZXcpCn0gZWxzZSB7CiAgZGZfbHlyaWNzIDwtIGRmX2x5cmljc19uZXcKfQoKIyBXcml0ZSBmb3VuZCBseXJpY3MKd3JpdGVfcmRzKGRmX2x5cmljcywgZmlsZV9seXJpY3MsIGNvbXByZXNzID0gImd6IikKCiMgQWxidW1zIHdpdGhvdXQgbHlyaWNzCmRmX2FsYnVtcyAlPiUgCiAgYW50aV9qb2luKGRmX2x5cmljcywgYnkgPSBjKCJhcnRpc3QiLCAiYWxidW0iKSkgJT4lIAogIGtuaXRyOjprYWJsZSgpCmBgYAoKYGBge3J9CiMgQ3JlYXRlIHJvdyBwZXIgdHJhY2ssIGNvbWJpbmluZyBseXJpY3MgaW4gb25lIHRleHQgZmllbGQKZGZfbHlyaWNfZG94IDwtIGRmX2x5cmljcyAlPiUgCiAgZmlsdGVyKCFpcy5uYShseXJpYykpICU+JSAKICBncm91cF9ieShhcnRpc3QsIGFsYnVtLCB5ZWFyX2FwcGVhcmFuY2UsIHRyYWNrX3RpdGxlLCB0cmFja19uKSAlPiUgCiAgc3VtbWFyaXNlKGx5cmljID0gcGFzdGUwKGx5cmljLCBjb2xsYXBzZSA9ICIgIikpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShkb2NfaWQgPSByb3dfbnVtYmVyKCkpICU+JSAKICBkcGx5cjo6c2VsZWN0KGRvY19pZCwgdGV4dCA9IGx5cmljLCBldmVyeXRoaW5nKCkpCgojIE1ha2UgZmFjdG9yIG9mIGFydGlzdHMgZm9yIG1vZGVsbGluZwpsZXZlbHNfYXJ0aXN0cyA8LSB1bmlxdWUoZGZfbHlyaWNfZG94JGFydGlzdCkKZGZfbHlyaWNfZG94JGFydGlzdCA8LSBmYWN0b3IoZGZfbHlyaWNfZG94JGFydGlzdCwgbGV2ZWxzID0gbGV2ZWxzX2FydGlzdHMpCgojIENvbnZlcnQgZGZfc291cmNlIHRvIGEgY29ycHVzOiBkZl9jb3JwdXMKZGZfc291cmNlIDwtIFZlY3RvclNvdXJjZShkZl9seXJpY19kb3gkdGV4dCkKY29ycHVzX2x5cmljcyA8LSBDb3JwdXMoZGZfc291cmNlKQoKIyBDbGVhbiBjb3JwdXMKY29ycHVzX2x5cmljcyAlPD4lIAogIHRtX21hcChyZW1vdmVXb3JkcywgYygiLSIsICIuLi4iLCAiTkEiLCAiY2hhcmFjdGVyIikpICU+JSAKICB0bV9tYXAoY29udGVudF90cmFuc2Zvcm1lcih0b2xvd2VyKSkgJT4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHJlbW92ZU51bWJlcnMpKSAlPiUgCiAgdG1fbWFwKGNvbnRlbnRfdHJhbnNmb3JtZXIocmVtb3ZlUHVuY3R1YXRpb24pKSAlPiUgCiAgdG1fbWFwKHJlbW92ZVdvcmRzLCBzdG9wd29yZHMoImVuZ2xpc2giKSkgJT4lIAogIHRtX21hcChjb250ZW50X3RyYW5zZm9ybWVyKHN0cmlwV2hpdGVzcGFjZSkpCgpgYGAKYGBge3J9CiMgQ3JlYXRlIGRvY3VtZW50IHRlcm0gYW5kIHRlcm0gZG9jdW1lbnQgbWF0cmljZXMKZHRtX2x5cmljcyA8LSBEb2N1bWVudFRlcm1NYXRyaXgoY29ycHVzX2x5cmljcykKdGRtX2x5cmljcyA8LSBUZXJtRG9jdW1lbnRNYXRyaXgoY29ycHVzX2x5cmljcykKYGBgCmBgYHtyfQojIENvbnZlcnQgVERNIHRvIG1hdHJpeAptYXRfbHlyaWNzIDwtIGFzLm1hdHJpeCh0ZG1fbHlyaWNzKQojIFN1bSByb3dzIGFuZCBmcmVxdWVuY3kgZGF0YSBmcmFtZQpseXJpY3NfdGVybV9mcmVxIDwtIHJvd1N1bXMobWF0X2x5cmljcykKIyBTb3J0IHRlcm1fZnJlcXVlbmN5IGluIGRlc2NlbmRpbmcgb3JkZXIKbHlyaWNzX3Rlcm1fZnJlcSA8LSBzb3J0KGx5cmljc190ZXJtX2ZyZXEsIGRlY3JlYXNpbmcgPSBUUlVFKQpiYXJwbG90KGx5cmljc190ZXJtX2ZyZXFbMToyMF0sIGNvbCA9ICJzdGVlbCBibHVlIiwgbGFzID0gMikKYGBgCmBgYHtyfQpsaWJyYXJ5KHdvcmRjbG91ZCkKbHlyaWNzX3dvcmRfZnJlcSA8LSBkYXRhLmZyYW1lKHRlcm0gPSBuYW1lcyhseXJpY3NfdGVybV9mcmVxKSwKICBudW0gPSBseXJpY3NfdGVybV9mcmVxKQojIENyZWF0ZSBhIHdvcmRjbG91ZCBmb3IgdGhlIHZhbHVlcyBpbiB3b3JkX2ZyZXFzCndvcmRjbG91ZChseXJpY3Nfd29yZF9mcmVxJHRlcm0sIGx5cmljc193b3JkX2ZyZXEkbnVtLCBtYXgud29yZHMgPSA1MCwgY29sb3JzID0gInJlZCIpCmBgYAoKCmBgYHtyIFNldHRpbmcgdXAgdHJhaW5pbmcgYW5kIHRlc3Qgc2V0fQpzZXQuc2VlZCg0MikKcXR5X3RyYWluIDwtIHJvdW5kKGxlbmd0aChjb3JwdXNfbHlyaWNzKSAqIC44LCAwKQppZHhfdHJhaW4gPC0gc2FtcGxlKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpLCBxdHlfdHJhaW4pCmlkeF90ZXN0IDwtIGMoMTpsZW5ndGgoY29ycHVzX2x5cmljcykpWyFjKDE6bGVuZ3RoKGNvcnB1c19seXJpY3MpKSAlaW4lIGlkeF90cmFpbl0KCmNvcnB1c190cmFpbiA8LSBjb3JwdXNfbHlyaWNzW2lkeF90cmFpbl0KY29ycHVzX3Rlc3QgPC0gY29ycHVzX2x5cmljc1tpZHhfdGVzdF0KYGBgCgpgYGB7ciBDcmVhdGluZyBkb2N1bWVudCB0ZXJtIG1hdHJpY2VzfQpkdG1fdHJhaW4gPC0gYXMubWF0cml4KERvY3VtZW50VGVybU1hdHJpeChjb3JwdXNfdHJhaW4sIGNvbnRyb2w9bGlzdCh3b3JkTGVuZ3Rocz1jKDEsSW5mKSkpKQpkdG1fdGVzdCA8LSBhcy5tYXRyaXgoRG9jdW1lbnRUZXJtTWF0cml4KGNvcnB1c190ZXN0LCBjb250cm9sPWxpc3Qod29yZExlbmd0aHM9YygxLEluZikpKSkKYGBgCgpgYGB7ciBDb25mb3JtaW5nIERUTXN9CmRmX3RyYWluIDwtIGRhdGEuZnJhbWUoZHRtX3RyYWluWyxpbnRlcnNlY3QoY29sbmFtZXMoZHRtX3RyYWluKSwgY29sbmFtZXMoZHRtX3Rlc3QpKV0pCmRmX3Rlc3QgPC0gZGF0YS5mcmFtZShkdG1fdGVzdFssaW50ZXJzZWN0KGNvbG5hbWVzKGR0bV90ZXN0KSwgY29sbmFtZXMoZHRtX3RyYWluKSldKQpgYGAKCmBgYHtyfQpkZl90cmFpbiRjb3JwdXMgPC0gZGZfbHlyaWNfZG94JGFydGlzdFtpZHhfdHJhaW5dCmRmX3Rlc3QkY29ycHVzIDwtIGRmX2x5cmljX2RveCRhcnRpc3RbaWR4X3Rlc3RdCmBgYAoKYGBge3IgQ3JlYXRlIG1vZGVsfQpmaXRfbW9kZWwgPC0ga3N2bShjb3JwdXMgfiAuLCBkYXRhID0gZGZfdHJhaW4sIGtlcm5lbCA9ICJyYmZkb3QiKQpkZl9wcmVkIDwtIHByZWRpY3QoZml0X2FydGlzdHMsIGRmX3Rlc3QsIHR5cGUgPSAicHJvYiIpCgpgYGAKYGBge3J9CmZpdF9hcnRpc3RzIDwtIHRyYWluKGNvcnB1cyB+IC4sIGRhdGEgPSBkZl90cmFpbiwgbWV0aG9kID0gInN2bUxpbmVhcjMiKQpgYGAKCmBgYHtyIFByZWRpY3R9CmRmX3ByZWQgPC0gcHJlZGljdChmaXRfYXJ0aXN0cywgZGZfdGVzdCkgIywgdHlwZSA9ICJwcm9iIikKYGBgCgpgYGB7cn0KbWF0cml4X2NvbmZ1c2lvbiA8LSBjb25mdXNpb25NYXRyaXgoZGZfcHJlZCwgZGZfdGVzdCRjb3JwdXMpCm1hdHJpeF9jb25mdXNpb24KYGBgCgpgYGB7cn0KZGZfYWNjdXJhY3kgPC0gY2JpbmQoZGZfbHlyaWNfZG94W2lkeF90ZXN0LCBdLCBwcmVkaWN0aW9uID0gZGZfcHJlZCkKZGZfYWNjdXJhY3kkYWNjdXJhY3kgPC0gaWZfZWxzZShkZl9hY2N1cmFjeSRwcmVkaWN0aW9uID09IGRmX2FjY3VyYWN5JGFydGlzdCwgMSwgMCkKYGBgCmBgYHtyfQpsaWJyYXJ5KHBlcmZvcm1hbmNlRXN0aW1hdGlvbikKY2xhc3NpZmljYXRpb25NZXRyaWNzKGRmX2FjY3VyYWN5JGFydGlzdCwgZGZfYWNjdXJhY3kkcHJlZGljdGlvbikKYGBgCg==</div>
 
 
 
