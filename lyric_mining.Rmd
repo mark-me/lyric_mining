@@ -15,13 +15,123 @@ library(tm)
 library(splitstackshape)
 library(e1071)
 ```
+```{r Functions for scraping data}
+library(httr)		# Library for scraping web data
+library(jsonlite)	# Library for reading JSON data
+
+# Retrieving an artist's MusicBrainz ID from last.fm
+get_artist_mbid <- function(name_artist){
+
+  url <- "http://ws.audioscrobbler.com/2.0/?"
+  method <- "method=artist.getInfo"
+  parameter <- paste0("artist=", name_artist)
+  api_key <- "api_key=bd357ecfcaa0085f4948c273729f44f4"
+  format <- "format=json"
+  qty_albums <- "limit=1"
+  rest_request <- paste0(url, paste(method, parameter, api_key, format, sep = "&"))
+  
+  json <- GET( rest_request ) #, use_proxy("172.16.16.62", 8080))	# Executing request
+  json_text <- content(json, as="text", encoding = "UTF-8")				# Get JSON text data
+  ls_artist <- fromJSON(json_text)				# loading text data in a list
+
+  return(ls_artist[1]$artist$mbid)
+}
+
+# Retrieving an artist's studio albums from MusicBrainz
+get_artist_studio_albums <- function(artist_mbid){
+  
+  url <- "http://musicbrainz.org/ws/2/artist/"
+  filter <- "?inc=release-groups"
+  format <- "format=json"
+  rest_request <- paste0(url, artist_mbid, filter, "&", format)
+
+  json <- GET( rest_request ) # , use_proxy("172.16.16.62", 8080))	# Executing request
+  json_text <- content(json, as="text", encoding = "UTF-8")				# Get JSON text data
+  ls_albums <- fromJSON(json_text)				# loading text data in a list
+  
+  ls_album_types <- ls_albums$`release-groups`$`secondary-types`
+  ls_album_types <- lapply(ls_album_types, function(x) ifelse(is.null(x), NA, x))
+  
+  df_albums <- tibble(artist = rep(ls_albums$`sort-name`, nrow(ls_albums$`release-groups`)),
+                      album = ls_albums$`release-groups`$title,
+                      date_appearance = ls_albums$`release-groups`$`first-release-date`,
+                      album_type = unlist(ls_album_types))
+  
+  df_albums %<>%
+    filter(is.na(album_type)) %>% 
+    mutate(year_release = str_sub(date_release, 1, 4)) %>% 
+    select(artist, album, year_release)
+  row.names(df_albums) <- NULL
+  
+  return(df_albums)
+}
+
+# Retrieving an artist's studio albums from last.fm
+get_artist_albums <- function(name_artist){
+
+  url <- "http://ws.audioscrobbler.com/2.0/?"
+  method <- "method=artist.getTopAlbums"
+  parameter <- paste0("artist=", name_artist)
+  api_key <- "api_key=bd357ecfcaa0085f4948c273729f44f4"
+  format <- "format=json"
+  qty_albums <- "limit=150"
+  rest_request <- paste0(url, paste(method, parameter, api_key, format, delimiter = "&"))
+  
+  # Executing REST request and getting josn text data
+  json <- GET( rest_request ) #, use_proxy("172.16.16.62", 8080))	# Executing request
+  json_text <- content(json, as = "text")				# Get JSON text data
+  ls_albums <- fromJSON(json_text)				# loading text data in a list
+
+  df_albums <- ls_albums$topalbums$album
+  df_albums <- as.tibble(cbind(artist = rep(name_artist, nrow(df_albums)),
+                               album = df_albums$name))
+  return(df_albums)
+}
+
+```
+
+```{r}
+vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica", "Queen")
+artists_mbid <- sapply(vec_artists, get_artist_mbid)
+
+df_albums <- tibble(artist = character(0),
+                    album = character(0),
+                    year_release = character(0))
+
+musicbrainz_json_may_fail <- function(artist_mbid) {
+  df_album <- get_artist_studio_albums(artist_mbid)
+  return(df_album)
+}
+
+for(artist_mbid in artists_mbid){
+
+  reply <- NULL
+  attempt <- 0
+  while( is.null(r) && attempt <= 20 ) {
+    attempt <- attempt + 1
+    try(
+      reply <- musicbrainz_json_may_fail(artist_mbid)
+    )
+    if(!is.null(r)) print("That went well!")
+    Sys.sleep(1)
+  } 
+  df_albums <- rbind(df_albums, reply)
+  
+}
+
+write_csv2(df_albums, "artists_albums.csv")
+
+table(df_albums$artist)
+#df_albums <- do.call("rbind", lapply(artists_mbid, get_artist_studio_albums))
+```
+
 ```{r Loading data}
 dir_input <- paste0(getwd(),  "/Input/")
 file_lyrics <- paste0(dir_input, "df_lyrics.RDS")
 
 # Read albums and pre-processed lyrics
 # df_albums <- read_csv2("https://raw.githubusercontent.com/mark-me/lyric_mining/master/artists_albums.csv")
-df_albums <- read_csv2("artists_albums.csv")
+# df_albums <- read_csv2("artists_albums.csv")
 if(file.exists(file_lyrics)){
   df_lyrics <- read_rds(file_lyrics) 
 } else {
@@ -45,38 +155,10 @@ write_rds(df_lyrics, file_lyrics, compress = "gz")
 ```
 
 ```{r}
-library(httr)		# Library for scraping web data
-library(jsonlite)	# Library for reading JSON data
-
-get_artist_albums <- function(name_artist){
-
-  name_artist <- "Neil Young"
-  url <- "http://ws.audioscrobbler.com/2.0/?"
-  method <- "method=artist.getTopAlbums"
-  parameter <- paste0("artist=", name_artist)
-  #no_artists <- "limit=100"
-  api_key <- "api_key=bd357ecfcaa0085f4948c273729f44f4"
-  format <- "format=json"
-  rest_request <- paste0(url, method, "&", parameter,"&", api_key, "&",format)
-  
-  # Executing REST request and getting josn text data
-  json <- GET( rest_request ) #, use_proxy("172.16.16.62", 8080))	# Executing request
-  json_text <- content(json, as="text")				# Get JSON text data
-  ls_albums <- fromJSON(json_text)				# loading text data in a list
-
-  df_albums <- ls_albums$topalbums$album
-  df_albums <- cbind(artist = rep(name_artist, nrow(df_albums)),
-                     album = df_albums$name) 
-  return(df_albums)
-}
-
-
-```
-
-```{r}
 df_lyric_dox <- df_lyrics %>% 
+  filter(!is.na(lyric)) %>% 
   group_by(artist, album, year_appearance, track_title, track_n) %>% 
-  summarise(lyric = paste0(lyric, collapse = " \n")) %>% 
+  summarise(lyric = paste0(lyric, collapse = " ")) %>% 
   ungroup() %>% 
   mutate(doc_id = row_number()) %>% 
   dplyr::select(doc_id, text = lyric, everything())
@@ -86,17 +168,39 @@ levels_artists <- unique(df_lyric_dox$artist)
 df_lyric_dox$artist <- factor(df_lyric_dox$artist, levels = levels_artists)
 
 # Convert df_source to a corpus: df_corpus
-df_source <- DataframeSource(df_lyric_dox)
-corpus_lyrics <- VCorpus(df_source)
+df_source <- VectorSource(df_lyric_dox$text)
+corpus_lyrics <- Corpus(df_source)
 
 corpus_lyrics %<>% 
-  tm_map(content_transformer(stripWhitespace)) %>% 
+  tm_map(removeWords, c("-", "...", "NA", "character")) %>% 
   tm_map(content_transformer(tolower)) %>% 
   tm_map(content_transformer(removeNumbers)) %>% 
   tm_map(content_transformer(removePunctuation)) %>% 
   tm_map(removeWords, stopwords("english")) %>% 
-  tm_map(removeWords, c("-", "..."))
+  tm_map(content_transformer(stripWhitespace))
+
 ```
+```{r}
+dtm_lyrics <- DocumentTermMatrix(corpus_lyrics)
+tdm_lyrics <- TermDocumentMatrix(corpus_lyrics)
+```
+```{r}
+# Convert TDM to matrix
+mat_lyrics <- as.matrix(tdm_lyrics)
+# Sum rows and frequency data frame
+lyrics_term_freq <- rowSums(mat_lyrics)
+# Sort term_frequency in descending order
+lyrics_term_freq <- sort(lyrics_term_freq, decreasing = TRUE)
+barplot(lyrics_term_freq[1:20], col = "steel blue", las = 2)
+```
+```{r}
+library(wordcloud)
+lyrics_word_freq <- data.frame(term = names(lyrics_term_freq),
+  num = lyrics_term_freq)
+# Create a wordcloud for the values in word_freqs
+wordcloud(lyrics_word_freq$term, lyrics_word_freq$num, max.words = 50, colors = "red")
+```
+
 
 ```{r Setting up training and test set}
 set.seed(42)
@@ -140,14 +244,12 @@ df_pred <- predict(fit_artists, df_test) #, type = "prob")
 matrix_confusion <- confusionMatrix(df_pred, df_test$corpus)
 matrix_confusion
 ```
+
+```{r}
+df_accuracy <- cbind(df_lyric_dox[idx_test, ], prediction = df_pred)
+df_accuracy$accuracy <- if_else(df_accuracy$prediction == df_accuracy$artist, 1, 0)
+```
 ```{r}
 library(performanceEstimation)
 classificationMetrics(df_accuracy$artist, df_accuracy$prediction)
 ```
-
-```{r}
-df_accuracy <- cbind(df_lyric_dox[idx_test, ],
-                     prediction = df_pred)
-df_accuracy$accuracy <- if_else(df_accuracy$prediction == df_accuracy$artist, 1, 0)
-```
-
