@@ -161,7 +161,7 @@ if(nrow(df_lyrics) != 0){
   df_lyrics <- df_lyrics_new
 }
 
-# Write found lyrics
+# Write found lyrics to intermediary file
 write_rds(df_lyrics, file_lyrics, compress = "gz")
 
 # Albums without lyrics
@@ -174,7 +174,7 @@ df_albums %>%
 # Create row per track, combining lyrics in one text field
 df_lyric_dox <- df_lyrics %>% 
   filter(!is.na(lyric)) %>% 
-  group_by(artist, album, year_appearance, track_title, track_n) %>% 
+  group_by(artist, album, year_release, track_title, track_n) %>% 
   summarise(lyric = paste0(lyric, collapse = " ")) %>% 
   ungroup() %>% 
   mutate(doc_id = row_number()) %>% 
