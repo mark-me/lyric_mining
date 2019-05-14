@@ -40,7 +40,7 @@ get_artist_studio_albums <- function(artist_mbid){
   
   url <- "http://musicbrainz.org/ws/2/artist/"
   filter <- "?inc=release-groups"
-  format <- "format=json"
+  format <- "fmt=json"
   rest_request <- paste0(url, artist_mbid, filter, "&", format)
   
   # The while loop is done because the MusicBrainz JSON API is unstable
@@ -61,20 +61,26 @@ get_artist_studio_albums <- function(artist_mbid){
   if(!is.null(ls_albums) & length(ls_albums) > 0 & is.null(ls_albums[["error"]])){
     
     ls_album_types <- ls_albums$`release-groups`$`secondary-types`
-    ls_album_types <- lapply(ls_album_types, function(x) ifelse(is.null(x), NA, x))
-    
-    df_albums <- tibble(artist = rep(ls_albums$`sort-name`, nrow(ls_albums$`release-groups`)),
-                        album = ls_albums$`release-groups`$title,
-                        date_appearance = ls_albums$`release-groups`$`first-release-date`,
-                        album_type = unlist(ls_album_types))
-    df_albums %<>%
+    if(sum(unlist(lapply(ls_album_types, length))) > 0){
+      ls_album_types <- lapply(ls_album_types, function(x) ifelse(is.null(x), NA, x))
+    } else {
+      ls_album_types <- rep(NA, nrow(ls_albums$`release-groups`))
+    }
+
+    df <- tibble(artist = rep(ls_albums$`sort-name`, nrow(ls_albums$`release-groups`)),
+                 album = ls_albums$`release-groups`$title,
+                 date_appearance = ls_albums$`release-groups`$`first-release-date`,
+                 album_type = unlist(ls_album_types))
+    df %<>%
       filter(is.na(album_type)) %>% 
       mutate(year_release = str_sub(date_appearance, 1, 4)) %>% 
       select(artist, album, year_release)
     row.names(df_albums) <- NULL    
+  } else {
+    df <- NULL
   }
 
-  return(df_albums)
+  return(df)
 }
 ``` 
 ```{r}
@@ -102,7 +108,7 @@ get_artist_albums <- function(name_artist){
 ```
 ```{r}
 vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica", 
-                 "Miley Cyrus", "Eminem", "Busta Rhymes")
+                 "Miley Cyrus", "Eminem", "Busta Rhymes", "The Beatles")
 
 df_artists <- tibble(artist = vec_artists,
                      artist_mbid = sapply(vec_artists, get_artist_mbid))
@@ -121,6 +127,7 @@ if(file.exists(file_albums)){
 
 artists_search <- df_artists$artist_mbid[!df_artists$artist %in% df_albums$artist]
 ```
+
 ```{r}
 for(artist_mbid in artists_search){
 
@@ -140,7 +147,6 @@ for(artist_mbid in artists_search){
   rm(df_artist_albums)    
 }
 
-df_albums <- unique(df_albums)
 write_csv2(df_albums, "artists_albums.csv")
 ```
 
