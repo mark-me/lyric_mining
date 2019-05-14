@@ -43,24 +43,37 @@ get_artist_studio_albums <- function(artist_mbid){
   format <- "format=json"
   rest_request <- paste0(url, artist_mbid, filter, "&", format)
   
-  json <- GET( rest_request ) # , use_proxy("172.16.16.62", 8080))	# Executing request
-  json_text <- content(json, as="text", encoding = "UTF-8")				# Get JSON text data
-  ls_albums <- fromJSON(json_text)				# loading text data in a list
+  # The while loop is done because the MusicBrainz JSON API is unstable
+  ls_albums <- NULL
+  attempt <- 0
+
+  while( (length(ls_albums) == 0 | is.null(ls_albums)) && attempt <= 99 ) {
+    
+    ls_albums <- NULL
+    attempt <- attempt + 1
+    json <- GET(rest_request)    # , use_proxy("172.16.16.62", 8080))	# Executing request
+    json_text <- content(json, as="text", encoding = "UTF-8")				# Get JSON text data
+    try(
+      ls_albums <- fromJSON(json_text)  # loading text data in a list
+    )
+  }
   
-  ls_album_types <- ls_albums$`release-groups`$`secondary-types`
-  ls_album_types <- lapply(ls_album_types, function(x) ifelse(is.null(x), NA, x))
-  
-  df_albums <- tibble(artist = rep(ls_albums$`sort-name`, nrow(ls_albums$`release-groups`)),
-                      album = ls_albums$`release-groups`$title,
-                      date_appearance = ls_albums$`release-groups`$`first-release-date`,
-                      album_type = unlist(ls_album_types))
-  
-  df_albums %<>%
-    filter(is.na(album_type)) %>% 
-    mutate(year_release = str_sub(date_appearance, 1, 4)) %>% 
-    select(artist, album, year_release)
-  row.names(df_albums) <- NULL
-  
+  if(!is.null(ls_albums) & length(ls_albums) > 0 & is.null(ls_albums[["error"]])){
+    
+    ls_album_types <- ls_albums$`release-groups`$`secondary-types`
+    ls_album_types <- lapply(ls_album_types, function(x) ifelse(is.null(x), NA, x))
+    
+    df_albums <- tibble(artist = rep(ls_albums$`sort-name`, nrow(ls_albums$`release-groups`)),
+                        album = ls_albums$`release-groups`$title,
+                        date_appearance = ls_albums$`release-groups`$`first-release-date`,
+                        album_type = unlist(ls_album_types))
+    df_albums %<>%
+      filter(is.na(album_type)) %>% 
+      mutate(year_release = str_sub(date_appearance, 1, 4)) %>% 
+      select(artist, album, year_release)
+    row.names(df_albums) <- NULL    
+  }
+
   return(df_albums)
 }
 ``` 
@@ -86,11 +99,10 @@ get_artist_albums <- function(name_artist){
                                album = df_albums$name))
   return(df_albums)
 }
-
 ```
-
 ```{r}
-vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica")
+vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica", 
+                 "Miley Cyrus", "Eminem", "Busta Rhymes")
 
 df_artists <- tibble(artist = vec_artists,
                      artist_mbid = sapply(vec_artists, get_artist_mbid))
@@ -107,36 +119,28 @@ if(file.exists(file_albums)){
                       year_release = character(0))
 }
 
-artists_search <- df_artists$artist_mbid[!df_artists %in% df_albums$artist]
+artists_search <- df_artists$artist_mbid[!df_artists$artist %in% df_albums$artist]
 ```
 ```{r}
 for(artist_mbid in artists_search){
 
   df_artist_albums <- tibble(artist = character(0), album = character(0), year_release = character(0))
   
-  attempt <- 0
-  while( (nrow(df_artist_albums) == 0 | is.null(df_artist_albums))
-         && attempt <= 99 ) {
-    attempt <- attempt + 1
-    try(
-      df_artist_albums <- get_artist_studio_albums(artist_mbid)
-    )
-    # Sys.sleep(1)
-  }
-  
-  if(nrow(df_artist_albums) > 0) {
+  df_artist_albums <- get_artist_studio_albums(artist_mbid)
+
+    if(nrow(df_artist_albums) > 0) {
     # Rename artist back to original form
     name_artist <- df_artists$artist[df_artists$artist_mbid == artist_mbid]
-    df_artist_albums %<>%
-      mutate(artist = name_artist)
+    df_artist_albums$artist = name_artist
   
     df_albums <- rbind(df_albums, df_artist_albums)  
   
     print(paste0("Added ", name_artist, " - ", nrow(df_artist_albums), " albums"))
   }
-    
+  rm(df_artist_albums)    
 }
-rm(df_artist_albums)
+
+df_albums <- unique(df_albums)
 write_csv2(df_albums, "artists_albums.csv")
 ```
 
@@ -160,14 +164,14 @@ if(nrow(df_lyrics) != 0){
 } else {
   df_lyrics <- df_lyrics_new
 }
+rm(df_lyrics_new)
 
 # Write found lyrics to intermediary file
 write_rds(df_lyrics, file_lyrics, compress = "gz")
 
 # Albums without lyrics
 df_albums %>% 
-  anti_join(df_lyrics, by = c("artist", "album")) %>% 
-  knitr::kable()
+  anti_join(df_lyrics, by = c("artist", "album")) 
 ```
 
 ```{r}
@@ -190,34 +194,54 @@ corpus_lyrics <- Corpus(df_source)
 
 # Clean corpus
 corpus_lyrics %<>% 
-  tm_map(removeWords, c("-", "...", "NA", "character")) %>% 
+  tm_map(removeWords, c("-", "—","“", "‘","…", "NA", "character")) %>% 
   tm_map(content_transformer(tolower)) %>% 
   tm_map(content_transformer(removeNumbers)) %>% 
   tm_map(content_transformer(removePunctuation)) %>% 
   tm_map(removeWords, stopwords("english")) %>% 
   tm_map(content_transformer(stripWhitespace))
-
 ```
 ```{r}
 # Create document term and term document matrices
 dtm_lyrics <- DocumentTermMatrix(corpus_lyrics)
 tdm_lyrics <- TermDocumentMatrix(corpus_lyrics)
 ```
+```{r Getting data for word visualisations}
+library(tidytext)
+df_lyric_words <- tidy(tdm_lyrics) 
+df_lyric_words %<>%
+  rename(doc_id = document) %>% 
+  mutate(doc_id = as.integer(doc_id)) %>% 
+  left_join(df_lyric_dox, by = "doc_id") %>% 
+  select(-text)
+```
+
 ```{r}
-# Convert TDM to matrix
-mat_lyrics <- as.matrix(tdm_lyrics)
-# Sum rows and frequency data frame
-lyrics_term_freq <- rowSums(mat_lyrics)
-# Sort term_frequency in descending order
-lyrics_term_freq <- sort(lyrics_term_freq, decreasing = TRUE)
-barplot(lyrics_term_freq[1:20], col = "steel blue", las = 2)
+df_word_freq <- df_lyric_words %>% 
+  group_by(term) %>% 
+  summarise(qty = sum(count)) %>% 
+  ungroup() 
+
+df_word_freq %>% 
+  arrange(desc(qty)) %>% 
+  head(20) %>% 
+ggplot(aes(x=reorder(term, qty), y = qty)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(x = "", y = "Word count") +
+  theme_bw() +
+  coord_flip()
+```
+```{r, fig.height=6}
+library(wordcloud)
+
+wordcloud(df_word_freq$term, df_word_freq$qty, max.words = 70, colors = c("aquamarine","darkgoldenrod","tomato"))
 ```
 ```{r}
-library(wordcloud)
-lyrics_word_freq <- data.frame(term = names(lyrics_term_freq),
-  num = lyrics_term_freq)
-# Create a wordcloud for the values in word_freqs
-wordcloud(lyrics_word_freq$term, lyrics_word_freq$num, max.words = 50, colors = "red")
+df_artist_word_freq <- df_lyric_words %>% 
+  group_by(term) %>% 
+  summarise(qty = sum(count)) %>% 
+  ungroup() 
 ```
 
 
@@ -246,21 +270,21 @@ df_train$corpus <- df_lyric_dox$artist[idx_train]
 df_test$corpus <- df_lyric_dox$artist[idx_test]
 ```
 
-```{r Create model}
-fit_model <- ksvm(corpus ~ ., data = df_train, kernel = "rbfdot")
+```{r Create ksvm model}
+fit_ksvm <- ksvm(corpus ~ ., data = df_train, kernel = "rbfdot")
 df_pred <- predict(fit_artists, df_test, type = "prob")
-
 ```
-```{r}
-fit_artists <- train(corpus ~ ., data = df_train, method = "svmLinear3")
+
+```{r Create linear SVM model}
+fit_svmLinear3 <- train(corpus ~ ., data = df_train, method = "svmLinear3")
 ```
 
 ```{r Predict}
-df_pred <- predict(fit_artists, df_test) #, type = "prob")
+df_pred_svmLinear3 <- predict(fit_svmLinear3, df_test) #, type = "prob")
 ```
 
 ```{r}
-matrix_confusion <- confusionMatrix(df_pred, df_test$corpus)
+matrix_confusion <- confusionMatrix(df_pred_svmLinear3, df_test$corpus)
 matrix_confusion
 ```
 
