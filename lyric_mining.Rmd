@@ -128,7 +128,7 @@ for(artist_mbid in artists_search){
   
   df_artist_albums <- get_artist_studio_albums(artist_mbid)
 
-    if(nrow(df_artist_albums) > 0) {
+  if(nrow(df_artist_albums) > 0) {
     # Rename artist back to original form
     name_artist <- df_artists$artist[df_artists$artist_mbid == artist_mbid]
     df_artist_albums$artist = name_artist
@@ -164,6 +164,7 @@ if(nrow(df_lyrics) != 0){
 } else {
   df_lyrics <- df_lyrics_new
 }
+
 rm(df_lyrics_new)
 
 # Write found lyrics to intermediary file
