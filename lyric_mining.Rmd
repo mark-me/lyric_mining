@@ -107,9 +107,9 @@ get_artist_albums <- function(name_artist){
 }
 ```
 ```{r}
-vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "The National", "Metallica", 
-                 "Miley Cyrus", "Eminem", "Busta Rhymes", "The Beatles")
-
+vec_artists <- c("Tindersticks", "Tom Waits", "Nick Cave and The Bad Seeds", "Vanilla Ice", "Metallica", "Miley Cyrus", 
+                 "Eminem", "Busta Rhymes", "The Beatles", "Bruce Springsteen", "ABBA", "Justin Timberlake", "Beyoncé", 
+                 "Destiny's Child", "Nina Simone")
 df_artists <- tibble(artist = vec_artists,
                      artist_mbid = sapply(vec_artists, get_artist_mbid))
 rm(vec_artists)
@@ -119,6 +119,7 @@ file_albums <- "artists_albums.csv"
 
 if(file.exists(file_albums)){
   df_albums <- read_csv2(file_albums)
+  df_albums %<>% filter(artist %in% df_artists$artist)
 } else {
   df_albums <- tibble(artist = character(0),
                       album = character(0),
