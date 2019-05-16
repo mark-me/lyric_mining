@@ -261,6 +261,19 @@ fit_svmLinear3 <- train(artist ~ ., data = df_train, method = "svmLinear3")
 print(difftime(Sys.time(), t1, units = 'sec'))
 ```
 
+```{r Create linear SVM model parallel}
+library(doParallel)
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl)
+
+t1 = Sys.time()
+fit_svmLinear3 <- train(artist ~ ., data = df_train, method = "svmLinear3")
+print(difftime(Sys.time(), t1, units = 'sec'))
+
+## When you are done:
+stopCluster(cl)
+```
+
 ```{r Predict}
 df_pred_svmLinear3 <- predict(fit_svmLinear3, df_test) #, type = "prob")
 ```
