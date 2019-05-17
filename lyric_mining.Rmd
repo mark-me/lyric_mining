@@ -367,19 +367,45 @@ dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>%
   transform(tfidf)
 ```
 
+tdidf train and test
+```{r}
+dtm_train <- lst_train$dtm_dataset
+tfidf_train <- TfIdf$new()
+dtm_train_tfidf <- fit_transform(dtm_train, tfidf_train)
+df_dtm_train_tfidf <- as_tibble(as.matrix(dtm_train_tfidf))
+df_dtm_train_tfidf$name_artist <- (df_train$artist)
+
+dtm_test <- lst_test$dtm_dataset
+tfidf_test <- TfIdf$new()
+dtm_test_tfidf <- fit_transform(dtm_test, tfidf_test)
+df_dtm_test_tfidf <- as_tibble(as.matrix(dtm_test_tfidf))
+df_dtm_test_tfidf$name_artist <- df_test$artist
+```
 
 ```{r Create linear SVM model parallel}
 library(doParallel)
+library(tictoc)
 cl <- makePSOCKcluster(4)
 registerDoParallel(cl)
 
-t1 = Sys.time()
-fit_svmLinear3 <- train(artist ~ ., data = lst_train$df_dtm_dataset, method = "svmLinear3")
-print(difftime(Sys.time(), t1, units = 'sec'))
+tic()
+fit_svmLinear3 <- train(name_artist ~ ., data = df_dtm_train_tfidf, method = "svmLinear3")
+toc()
 
 ## When you are done:
 stopCluster(cl)
 ```
+```{r}
+df_new <- data.frame(df_dtm_test_tfidf[,intersect(colnames(df_dtm_test_tfidf), 
+                                                  colnames(df_dtm_train_tfidf))])
+
+pred_artist_name <- predict(fit_svmLinear3, df_new)
+
+tibble(prediction = pred_artist_name,
+       name_artist = df_dtm_test_tfidf$name_artist)
+```
+
+
 ```{r}
 colnames(lst_train$df_dtm_dataset)
 
