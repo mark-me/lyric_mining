@@ -186,8 +186,25 @@ if(nrow(df_lyrics) != 0){
 }
 
 # Write found lyrics to intermediary file
-write_rds(df_lyrics, file_lyrics, compress = "gz")
+if(nrow(df_lyrics_new) > 0) {
+  
+  # Deduplicate songs
+  df_lyrics %<>% 
+    mutate(year_release = ifelse(is.na(year_release), "9999", year_release)) %>% 
+    group_by(artist, track_title) %>% 
+    mutate(year_release_first = min(year_release)) %>% 
+    ungroup() %>% 
+    filter(year_release_first == year_release) %>% 
+    select(-year_release_first) %>% 
+    group_by(artist, track_title) %>% 
+    mutate(track_n_first = min(track_n)) %>% 
+    ungroup() %>% 
+    filter(track_n_first == track_n) %>% 
+    select(-track_n_first) 
 
+  write_rds(df_lyrics, file_lyrics, compress = "gz")
+}
+  
 rm(file_lyrics, df_lyrics_new)
 
 # Albums without lyrics
@@ -243,9 +260,6 @@ _prune_vocabulary()_: Removes uncommon term, terms which are in few documents an
 prep_data_set <- function(df_dataset){
   
   # define preprocessing function and tokenization function
-  # prep_fun <- tolower
-  # tok_fun <- word_tokenizer
-  
   iterator_terms <- itoken(df_dataset$text,
                            preprocessor = tolower, 
                            tokenizer = word_tokenizer, 
@@ -253,11 +267,11 @@ prep_data_set <- function(df_dataset){
                            progressbar = FALSE)
 
   vocab <- create_vocabulary(iterator_terms,
-                             stopwords = stopwords("english"))
+                             stopwords = c(stopwords("english"), "instrumental"))
 
   # Prune vocabulary: removing uncommon words in few documents and words which are overrepresented in documents
   vocab <- prune_vocabulary(vocab,
-                            term_count_min = 10,
+                            term_count_min = 2,
                             doc_proportion_max = 0.5,
                             doc_proportion_min = 0.001)
    
@@ -267,19 +281,92 @@ prep_data_set <- function(df_dataset){
   # create document-term matrix
   dtm_dataset = create_dtm(iterator_terms, vectorizer)
 
-  df_dtm_dataset <- as.tibble(as.matrix(dtm_dataset))
+  df_dtm_dataset <- as_tibble(as.matrix(dtm_dataset))
   df_dtm_dataset$artist <- df_dataset$artist
 
-  lst_return <- list(df_dtm_dataset = df_dtm_dataset,
+  lst_return <- list(dtm_dataset = dtm_dataset,
+                     tdf_dtm_dataset = df_dtm_dataset,
                      vocab = vocab)
 
   return(lst_return)
 }
 ```
 ```{r}
+lst_lyrics <- prep_data_set(df_lyric_dox)
 lst_train <- prep_data_set(df_train)
 lst_test <- prep_data_set(df_test)
 ```
+```{r}
+df_word_freq <- lst_lyrics$df_dtm_dataset %>% 
+  gather(key = term, value = qty, -artist) %>% 
+  group_by(term) %>% 
+  summarise(qty = sum(qty)) %>% 
+  ungroup() 
+
+df_word_freq %>% 
+  arrange(desc(qty)) %>% 
+  head(20) %>% 
+ggplot(aes(x=reorder(term, qty), y = qty)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(x = "", y = "Word count") +
+  theme_bw() +
+  coord_flip()
+```
+```{r, fig.height=6}
+library(wordcloud)
+
+wordcloud(df_word_freq$term, df_word_freq$qty, max.words = 75, colors = c("aquamarine","darkgoldenrod","tomato"))
+```
+```{r, fig.height=7}
+df_dtm_lyrics <- lst_lyrics$df_dtm_dataset
+df_dtm_lyrics$track_title <- df_lyric_dox$track_title
+
+df_artist_word_freq <-  df_dtm_lyrics %>% 
+  gather(key = term, value = freq_term, -artist, -track_title) %>% 
+  mutate(qty_songs = 1) %>% 
+  group_by(term, artist) %>% 
+  summarise(qty_songs = sum(qty_songs),
+            freq_term = sum(freq_term)) %>% 
+  ungroup() %>% 
+  mutate(perc_of_document = freq_term / qty_songs)
+
+df_artist_word_freq %>% 
+  arrange(desc(perc_of_document)) %>%
+  group_by(artist) %>% 
+  mutate(rank = row_number()) %>% 
+  ungroup() %>% 
+  filter(rank <= 7) %>% 
+ggplot(aes(x=reorder(term, perc_of_document), y = perc_of_document)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(x = "", y = "Word count") +
+  facet_grid(.~artist) +
+  theme_bw() +
+  coord_flip()
+```
+# TF_IDF
+```{r}
+dtm_lyrics <- lst_lyrics$dtm_dataset
+
+# define tfidf model
+tfidf = TfIdf$new()
+# fit model to train data and transform train data with fitted model
+dtm_lyrics_tfidf = fit_transform(dtm_lyrics, tfidf)
+
+df_dtm_lyrics_tfidf <- as_tibble(as.matrix(dtm_lyrics_tfidf))
+df_dtm_lyrics_tfidf$name_artist <- df_lyric_dox$artist
+df_dtm_lyrics_tfidf$track_title <- df_lyric_dox$track_title
+df_dtm_lyrics_tfidf %>% 
+  gather(key = term, value = freq_term, -name_artist, -track_title) %>% 
+  filter(freq_term > 0) %>% 
+  arrange(desc(freq_term))
+# tfidf modified by fit_transform() call!
+# apply pre-trained tf-idf transformation to test data
+dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>% 
+  transform(tfidf)
+```
+
 
 ```{r Create linear SVM model parallel}
 library(doParallel)
