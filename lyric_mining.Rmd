@@ -118,8 +118,10 @@ df_artists <- tibble(artist = vec_artists,
 rm(vec_artists)
 ```
 
-# Setting up for 
-```{r}
+# Retrieving albums
+
+## Pre-loading albums if there are any
+```{r, message=TRUE}
 file_albums <- "artists_albums.csv"
 
 if(file.exists(file_albums)){
@@ -130,10 +132,12 @@ if(file.exists(file_albums)){
                       album = character(0),
                       year_release = character(0))
 }
+rm(file_albums)
 
 artists_search <- df_artists$artist_mbid[!df_artists$artist %in% df_albums$artist]
 ```
 
+## Getting albums
 ```{r}
 for(artist_mbid in artists_search){
 
@@ -149,13 +153,17 @@ for(artist_mbid in artists_search){
     df_albums <- rbind(df_albums, df_artist_albums)  
   
     print(paste0("Added ", name_artist, " - ", nrow(df_artist_albums), " albums"))
+    rm(name_artist)
   }
   rm(df_artist_albums)    
 }
 
+rm(artist_mbid, artists_search)
+
 write_csv2(df_albums, "artists_albums.csv")
 ```
 
+# Getting lyrics
 ```{r Loading data}
 # Read albums and pre-processed lyrics
 file_lyrics <- "df_lyrics.RDS"
@@ -177,16 +185,17 @@ if(nrow(df_lyrics) != 0){
   df_lyrics <- df_lyrics_new
 }
 
-rm(df_lyrics_new)
-
 # Write found lyrics to intermediary file
 write_rds(df_lyrics, file_lyrics, compress = "gz")
+
+rm(file_lyrics, df_lyrics_new)
 
 # Albums without lyrics
 df_albums %>% 
   anti_join(df_lyrics, by = c("artist", "album")) 
 ```
 
+# Making lyrics per song
 ```{r}
 # Create row per track, combining lyrics in one text field
 df_lyric_dox <- df_lyrics %>% 
@@ -201,11 +210,16 @@ df_lyric_dox <- df_lyrics %>%
 levels_artists <- unique(df_lyric_dox$artist)
 df_lyric_dox$artist <- factor(df_lyric_dox$artist, levels = levels_artists)
 ```
+
 # Method 1: text2vec
+
+Why use text2vec? Texts themselves can take up a lot of memory, but vectorized texts usually do not, because they are stored as sparse matrices. Because of R’s copy-on-modify semantics, it is not easy to iteratively grow a DTM. Thus constructing a DTM, even for a small collections of documents, can be a serious bottleneck for analysts and researchers. It involves reading the whole collection of text documents into RAM and processing it as single vector, which can easily increase memory use by a factor of 2 to 4. The text2vec package solves this problem by providing a better way of constructing a document-term matrix.
+
 ```{r}
 library(text2vec)
 library(data.table)
 
+# Setting up training and testing set
 set.seed(42)
 all_ids <- df_lyric_dox$doc_id
 qty_train <- round(length(all_ids) * .8, 0)
@@ -213,52 +227,58 @@ train_ids <- sample(all_ids, qty_train)
 test_ids <- setdiff(all_ids, train_ids)
 df_train <- df_lyric_dox[train_ids, ]
 df_test <- df_lyric_dox[test_ids, ]
+rm(qty_train, all_ids)
 ```
+
+_itoken()_ : Creates an iterator over tokens. All functions prefixed with create_ from the __text2vec__ library work with these iterators. The iterator abstraction allows us to hide most of details about input and to process data in memory-friendly chunks.
+Faster and more extensive tokenizers from the library [tokenizers](https://cran.r-project.org/web/packages/tokenizers/vignettes/introduction-to-tokenizers.html) can be used.
+
+_create_vocabulary()_: Creates the vocabulary. In the text mining field the concept 'terms' are used instead of words, because the unit of analysis could be single words, two word units (bi-grams) or up to any length phrases (n-grams). By default it creates terms of of word in lenght, but this can be set to different ranges using the _ngram_ argument. For example by setting it to `ngram = c(1L, 2L)` the term length wil be set to 1 and 2 word lengths.
+
+_create_dtm()_: Creates a Document Term Matric (DTM), which shows for each document (lyrics as rows), the frequency of word usage (each term is a column).
+
+_prune_vocabulary()_: Removes uncommon term, terms which are in few documents and words which are overrepresented in documents. This would remove statisticly irrelevant terms 
 
 ```{r}
-# define preprocessing function and tokenization function
-prep_fun <- tolower
-tok_fun <- word_tokenizer
+prep_data_set <- function(df_dataset){
+  
+  # define preprocessing function and tokenization function
+  # prep_fun <- tolower
+  # tok_fun <- word_tokenizer
+  
+  iterator_terms <- itoken(df_dataset$text,
+                           preprocessor = tolower, 
+                           tokenizer = word_tokenizer, 
+                           ids = df_dataset$doc_id, 
+                           progressbar = FALSE)
 
-it_train <- itoken(df_train$text,
-                   preprocessor = prep_fun, 
-                   tokenizer = tok_fun, 
-                   ids = df_train$doc_id, 
-                   progressbar = FALSE)
-vocab <- create_vocabulary(it_train, stopwords = stopwords("english"))
+  vocab <- create_vocabulary(iterator_terms,
+                             stopwords = stopwords("english"))
+
+  # Prune vocabulary: removing uncommon words in few documents and words which are overrepresented in documents
+  vocab <- prune_vocabulary(vocab,
+                            term_count_min = 10,
+                            doc_proportion_max = 0.5,
+                            doc_proportion_min = 0.001)
+   
+  # Transform tokens into vector space - i.e. how to map words to indices
+  vectorizer = vocab_vectorizer(vocab)
+  
+  # create document-term matrix
+  dtm_dataset = create_dtm(iterator_terms, vectorizer)
+
+  df_dtm_dataset <- as.tibble(as.matrix(dtm_dataset))
+  df_dtm_dataset$artist <- df_dataset$artist
+
+  lst_return <- list(df_dtm_dataset = df_dtm_dataset,
+                     vocab = vocab)
+
+  return(lst_return)
+}
 ```
-
-
-Prune vocabulary: removing uncommon words in few documents
 ```{r}
-pruned_vocab <- prune_vocabulary(vocab, 
-                                 term_count_min = 10, 
-                                 doc_proportion_max = 0.5,
-                                 doc_proportion_min = 0.001)
-```
-
-Construct document-term matrix
-```{r}
-vectorizer = vocab_vectorizer(pruned_vocab)
-# create dtm_train with new pruned vocabulary vectorizer
-t1 = Sys.time()
-dtm_train = create_dtm(it_train, pruned_vocab)
-print(difftime(Sys.time(), t1, units = 'sec'))
-```
-```{r}
-identical(rownames(dtm_train), as.character(df_train$doc_id))
-
-```
-
-```{r}
-df_train <- as.tibble(as.matrix(dtm_train))
-df_train$artist <- df_lyric_dox$artist[train_ids] 
-```
-
-```{r Create linear SVM model}
-t1 = Sys.time()
-fit_svmLinear3 <- train(artist ~ ., data = df_train, method = "svmLinear3")
-print(difftime(Sys.time(), t1, units = 'sec'))
+lst_train <- prep_data_set(df_train)
+lst_test <- prep_data_set(df_test)
 ```
 
 ```{r Create linear SVM model parallel}
@@ -267,15 +287,21 @@ cl <- makePSOCKcluster(4)
 registerDoParallel(cl)
 
 t1 = Sys.time()
-fit_svmLinear3 <- train(artist ~ ., data = df_train, method = "svmLinear3")
+fit_svmLinear3 <- train(artist ~ ., data = lst_train$df_dtm_dataset, method = "svmLinear3")
 print(difftime(Sys.time(), t1, units = 'sec'))
 
 ## When you are done:
 stopCluster(cl)
 ```
+```{r}
+colnames(lst_train$df_dtm_dataset)
+
+df_train <- data.frame(dtm_train[,intersect(colnames(dtm_train), colnames(dtm_test))])
+df_test <- data.frame(dtm_test[,intersect(colnames(dtm_test), colnames(dtm_train))])
+```
 
 ```{r Predict}
-df_pred_svmLinear3 <- predict(fit_svmLinear3, df_test) #, type = "prob")
+df_pred_svmLinear3 <- predict(fit_svmLinear3, lst_test$df_dtm_dataset) #, type = "prob")
 ```
 
 ```{r}
