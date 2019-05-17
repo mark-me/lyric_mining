@@ -267,7 +267,8 @@ prep_data_set <- function(df_dataset){
                            progressbar = FALSE)
 
   vocab <- create_vocabulary(iterator_terms,
-                             stopwords = c(stopwords("english"), "instrumental"))
+                             stopwords = c(stopwords("english"), "instrumental"),
+                             ngram = c(1L, 2L))
 
   # Prune vocabulary: removing uncommon words in few documents and words which are overrepresented in documents
   vocab <- prune_vocabulary(vocab,
@@ -276,8 +277,9 @@ prep_data_set <- function(df_dataset){
                             doc_proportion_min = 0.001)
    
   # Transform tokens into vector space - i.e. how to map words to indices
-  vectorizer = vocab_vectorizer(vocab)
-  
+  # vectorizer = vocab_vectorizer(vocab)
+  vectorizer = hash_vectorizer(hash_size = 2 ^ 14, ngram = c(1L, 2L))
+
   # create document-term matrix
   dtm_dataset = create_dtm(iterator_terms, vectorizer)
 
@@ -285,7 +287,7 @@ prep_data_set <- function(df_dataset){
   df_dtm_dataset$artist <- df_dataset$artist
 
   lst_return <- list(dtm_dataset = dtm_dataset,
-                     tdf_dtm_dataset = df_dtm_dataset,
+                     df_dtm_dataset = df_dtm_dataset,
                      vocab = vocab)
 
   return(lst_return)
@@ -363,8 +365,8 @@ df_dtm_lyrics_tfidf %>%
   arrange(desc(freq_term))
 # tfidf modified by fit_transform() call!
 # apply pre-trained tf-idf transformation to test data
-dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>% 
-  transform(tfidf)
+# dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>% 
+#   transform(tfidf)
 ```
 
 tdidf train and test
