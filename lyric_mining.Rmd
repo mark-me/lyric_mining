@@ -211,6 +211,10 @@ rm(file_lyrics, df_lyrics_new)
 df_albums %>% 
   anti_join(df_lyrics, by = c("artist", "album")) 
 ```
+```{r}
+df_lyric_dox %>% 
+  group_by(artist)
+```
 
 # Making lyrics per song
 ```{r}
@@ -348,39 +352,23 @@ ggplot(aes(x=reorder(term, perc_of_document), y = perc_of_document)) +
   coord_flip()
 ```
 # TF_IDF
-```{r}
-dtm_lyrics <- lst_lyrics$dtm_dataset
-
-# define tfidf model
-tfidf = TfIdf$new()
-# fit model to train data and transform train data with fitted model
-dtm_lyrics_tfidf = fit_transform(dtm_lyrics, tfidf)
-
-df_dtm_lyrics_tfidf <- as_tibble(as.matrix(dtm_lyrics_tfidf))
-df_dtm_lyrics_tfidf$name_artist <- df_lyric_dox$artist
-df_dtm_lyrics_tfidf$track_title <- df_lyric_dox$track_title
-df_dtm_lyrics_tfidf %>% 
-  gather(key = term, value = freq_term, -name_artist, -track_title) %>% 
-  filter(freq_term > 0) %>% 
-  arrange(desc(freq_term))
-# tfidf modified by fit_transform() call!
-# apply pre-trained tf-idf transformation to test data
-# dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>% 
-#   transform(tfidf)
-```
 
 tdidf train and test
 ```{r}
-dtm_train <- lst_train$dtm_dataset
-tfidf_train <- TfIdf$new()
-dtm_train_tfidf <- fit_transform(dtm_train, tfidf_train)
-df_dtm_train_tfidf <- as_tibble(as.matrix(dtm_train_tfidf))
+TF_IDFY <- function(dtm){
+  
+  dtm_train <- lst_train$dtm_dataset
+  tfidf <- TfIdf$new()
+  dtm_tfidf <- fit_transform(dtm, tfidf)
+  df_dtm_tfidf <- as_tibble(as.matrix(dtm_tfidf))
+  
+  return(df_dtm_tfidf)
+}
+
+df_dtm_train_tfidf <- TF_IDFY(lst_train$dtm_dataset)
 df_dtm_train_tfidf$name_artist <- (df_train$artist)
 
-dtm_test <- lst_test$dtm_dataset
-tfidf_test <- TfIdf$new()
-dtm_test_tfidf <- fit_transform(dtm_test, tfidf_test)
-df_dtm_test_tfidf <- as_tibble(as.matrix(dtm_test_tfidf))
+df_dtm_test_tfidf <- TF_IDFY(lst_test$dtm_dataset)
 df_dtm_test_tfidf$name_artist <- df_test$artist
 ```
 
@@ -394,17 +382,64 @@ tic()
 fit_svmLinear3 <- train(name_artist ~ ., data = df_dtm_train_tfidf, method = "svmLinear3")
 toc()
 
-## When you are done:
 stopCluster(cl)
 ```
 ```{r}
 df_new <- data.frame(df_dtm_test_tfidf[,intersect(colnames(df_dtm_test_tfidf), 
                                                   colnames(df_dtm_train_tfidf))])
 
-pred_artist_name <- predict(fit_svmLinear3, df_new)
+pred_artist_name <- predict(fit_svmLinear3, df_dtm_test_tfidf)
 
-tibble(prediction = pred_artist_name,
-       name_artist = df_dtm_test_tfidf$name_artist)
+df_test_accuracy <- tibble(artist_predicted = pred_artist_name,
+                           artist = df_test$artist,
+                           
+                           track_title = df_test$track_title)
+df_test_accuracy %<>%
+  group_by(artist) %>% 
+  mutate(qty_tracks = n()) %>% 
+  ungroup() %>% 
+  group_by(artist, artist_predicted, qty_tracks) %>% 
+  summarise(qty_predictions = n()) %>% 
+  ungroup() %>% 
+  mutate(perc_predictions = qty_predictions/qty_tracks) 
+```
+```{r}
+library(ggrepel)
+df_test_accuracy %>% 
+  filter(artist == artist_predicted) %>% 
+ggplot(aes(x = qty_tracks, y = perc_predictions)) +
+  geom_jitter() +
+  geom_label_repel(aes(label = artist))
+```
+```{r}
+dtm_all <- lst_lyrics$dtm_dataset
+tfidf_all <- TfIdf$new()
+dtm_all_tfidf <- fit_transform(dtm_all, tfidf_all)
+df_dtm_all_tfidf <- as_tibble(as.matrix(dtm_all_tfidf))
+df_dtm_all_tfidf$name_artist <- (df_lyric_dox$artist)
+```
+```{r}
+pred_artist_name <- predict(fit_svmLinear3, df_dtm_all_tfidf)
+
+df_test_accuracy <- tibble(artist_predicted = pred_artist_name,
+                           artist = df_lyric_dox$artist,
+                           track_title = df_lyric_dox$track_title)
+df_test_accuracy %<>%
+  group_by(artist) %>% 
+  mutate(qty_tracks = n()) %>% 
+  ungroup() %>% 
+  group_by(artist, artist_predicted, qty_tracks) %>% 
+  summarise(qty_predictions = n()) %>% 
+  ungroup() %>% 
+  mutate(perc_predictions = qty_predictions/qty_tracks) 
+```
+```{r}
+library(ggrepel)
+df_test_accuracy %>% 
+  filter(artist == artist_predicted) %>% 
+ggplot(aes(x = qty_tracks, y = perc_predictions)) +
+  geom_jitter() +
+  geom_label_repel(aes(label = artist))
 ```
 
 
